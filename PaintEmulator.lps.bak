@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="9"/>
+    <BuildModes Active="Default"/>
+    <Units Count="40">
+      <Unit0>
+        <Filename Value="PaintEmulator.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="51" Y="10"/>
+        <UsageCount Value="200"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainScreen"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Main"/>
+        <TopLine Value="264"/>
+        <CursorPos X="38" Y="317"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="aboutform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="About"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="AboutForm"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="46" Y="32"/>
+        <UsageCount Value="200"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="ufigures.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UFigures"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <CursorPos X="7" Y="29"/>
+        <ExtraEditorCount Value="1"/>
+        <ExtraEditor1>
+          <EditorIndex Value="-1"/>
+          <WindowIndex Value="-1"/>
+          <TopLine Value="45"/>
+          <CursorPos X="32" Y="71"/>
+        </ExtraEditor1>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="utools.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UTools"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="482"/>
+        <CursorPos X="46" Y="508"/>
+        <ExtraEditorCount Value="1"/>
+        <ExtraEditor1>
+          <EditorIndex Value="-1"/>
+          <WindowIndex Value="-1"/>
+          <TopLine Value="284"/>
+          <CursorPos X="3" Y="319"/>
+        </ExtraEditor1>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="uscale.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UScale"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="170"/>
+        <CursorPos Y="194"/>
+        <UsageCount Value="145"/>
+        <Loaded Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="C:\lazarus\fpc\3.0.0\source\rtl\inc\objpash.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="176"/>
+        <CursorPos X="23" Y="193"/>
+        <UsageCount Value="10"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="C:\lazarus\fpc\3.0.0\source\rtl\objpas\objpas.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="9"/>
+        <CursorPos X="8" Y="35"/>
+        <UsageCount Value="1"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="C:\lazarus\fpc\3.0.0\source\rtl\objpas\classes\classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="160"/>
+        <CursorPos X="4" Y="27"/>
+        <UsageCount Value="1"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="C:\lazarus\fpc\3.0.0\source\rtl\win64\classes.pp"/>
+        <UnitName Value="Classes"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2"/>
+        <CursorPos X="3" Y="28"/>
+        <UsageCount Value="1"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="C:\lazarus\lcl\include\control.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4243"/>
+        <CursorPos Y="4269"/>
+        <UsageCount Value="9"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="C:\lazarus\lcl\include\customform.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1400"/>
+        <CursorPos Y="1426"/>
+        <UsageCount Value="1"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="C:\lazarus\lcl\include\wincontrol.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="6198"/>
+        <CursorPos Y="6226"/>
+        <UsageCount Value="9"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="C:\lazarus\lcl\include\buttoncontrol.inc"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="21"/>
+        <UsageCount Value="1"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="C:\lazarus\lcl\include\buttons.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="144"/>
+        <CursorPos Y="170"/>
+        <UsageCount Value="1"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="C:\lazarus\lcl\include\bitbtn.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="39"/>
+        <CursorPos Y="65"/>
+        <UsageCount Value="1"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="C:\lazarus\lcl\lclmessageglue.pas"/>
+        <UnitName Value="LCLMessageGlue"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="79"/>
+        <CursorPos Y="104"/>
+        <UsageCount Value="1"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="..\..\AppData\Local\Temp\Rar$DIa0.746\uscale.pas"/>
+        <UnitName Value="UScale"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="1"/>
+        <TopLine Value="139"/>
+        <CursorPos X="44" Y="164"/>
+        <UsageCount Value="9"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="..\..\AppData\Local\Temp\Rar$DIa0.567\utools.pas"/>
+        <UnitName Value="UTools"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="1"/>
+        <TopLine Value="13"/>
+        <UsageCount Value="9"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="..\..\AppData\Local\Temp\Rar$DIa0.550\ufigures.pas"/>
+        <UnitName Value="UFigures"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="1"/>
+        <TopLine Value="19"/>
+        <CursorPos X="3" Y="22"/>
+        <UsageCount Value="9"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="..\..\AppData\Local\Temp\Rar$DIa0.453\main.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="209"/>
+        <CursorPos X="100" Y="104"/>
+        <UsageCount Value="9"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="..\..\AppData\Local\Temp\Rar$DIa0.064\sol_ask.pp"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="29" Y="17"/>
+        <UsageCount Value="3"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="..\..\AppData\Local\Temp\Rar$DIa0.253\sol_naive.pp"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="5" Y="23"/>
+        <UsageCount Value="3"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="..\..\AppData\Local\Temp\Rar$DIa0.812\main.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="136"/>
+        <CursorPos X="46" Y="164"/>
+        <UsageCount Value="8"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="C:\lazarus\lcl\include\scrollbar.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="66"/>
+        <CursorPos Y="98"/>
+        <UsageCount Value="9"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="..\Paint Mupoc\paint.lpi"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="8"/>
+        <DefaultSyntaxHighlighter Value="XML"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="C:\lazarus\lcl\include\spinedit.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="6"/>
+        <CursorPos Y="32"/>
+        <UsageCount Value="9"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="C:\lazarus\lcl\lclclasses.pp"/>
+        <UnitName Value="LCLClasses"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="70"/>
+        <CursorPos Y="96"/>
+        <UsageCount Value="9"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="C:\lazarus\lcl\include\customedit.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="357"/>
+        <CursorPos Y="383"/>
+        <UsageCount Value="9"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="C:\lazarus\lcl\widgetset\wscontrols.pp"/>
+        <UnitName Value="WSControls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="428"/>
+        <CursorPos Y="468"/>
+        <UsageCount Value="9"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="C:\lazarus\lcl\lresources.pp"/>
+        <UnitName Value="LResources"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="658"/>
+        <CursorPos Y="689"/>
+        <UsageCount Value="9"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="C:\lazarus\lcl\graphics.pp"/>
+        <UnitName Value="Graphics"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="1178"/>
+        <CursorPos X="15" Y="1191"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="..\..\..\Vector-Graphics-Editor-master\utools.pas"/>
+        <UnitName Value="UTools"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="1"/>
+        <TopLine Value="173"/>
+        <UsageCount Value="11"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="..\..\..\Vector-Graphics-Editor-master\uparameters.pas"/>
+        <UnitName Value="UParameters"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="67"/>
+        <CursorPos X="5" Y="101"/>
+        <UsageCount Value="11"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="..\..\..\..\AppData\Roaming\Skype\My Skype Received Files\ufigures.pas"/>
+        <UnitName Value="UFigures"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="1"/>
+        <TopLine Value="93"/>
+        <CursorPos X="28" Y="130"/>
+        <UsageCount Value="11"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="..\..\..\..\AppData\Roaming\Skype\My Skype Received Files\umove.pas"/>
+        <UnitName Value="UMove"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="1"/>
+        <TopLine Value="141"/>
+        <CursorPos X="35" Y="166"/>
+        <UsageCount Value="10"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="..\..\..\..\AppData\Roaming\Skype\My Skype Received Files\utools.pas"/>
+        <UnitName Value="UTools"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="337"/>
+        <CursorPos X="13" Y="356"/>
+        <UsageCount Value="10"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="C:\lazarus\lcl\include\pen.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="141"/>
+        <CursorPos Y="164"/>
+        <UsageCount Value="10"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="C:\lazarus\lcl\include\canvas.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1802"/>
+        <CursorPos X="3" Y="892"/>
+        <UsageCount Value="10"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="C:\lazarus\lcl\include\brush.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="41"/>
+        <CursorPos Y="58"/>
+        <UsageCount Value="10"/>
+      </Unit39>
+    </Units>
+    <JumpHistory Count="14" HistoryIndex="13">
+      <Position1>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="145" TopLine="129"/>
+      </Position1>
+      <Position2>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="146" TopLine="129"/>
+      </Position2>
+      <Position3>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="147" TopLine="129"/>
+      </Position3>
+      <Position4>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="148" TopLine="129"/>
+      </Position4>
+      <Position5>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="150" TopLine="129"/>
+      </Position5>
+      <Position6>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="151" TopLine="129"/>
+      </Position6>
+      <Position7>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="152" TopLine="129"/>
+      </Position7>
+      <Position8>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="153" TopLine="129"/>
+      </Position8>
+      <Position9>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="154" TopLine="129"/>
+      </Position9>
+      <Position10>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="158" TopLine="129"/>
+      </Position10>
+      <Position11>
+        <Filename Value="uscale.pas"/>
+        <Caret Line="193" TopLine="170"/>
+      </Position11>
+      <Position12>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="159" Column="14" TopLine="129"/>
+      </Position12>
+      <Position13>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="153" Column="32" TopLine="123"/>
+      </Position13>
+      <Position14>
+        <Filename Value="ufigures.pas"/>
+        <Caret Line="112" TopLine="134"/>
+      </Position14>
+    </JumpHistory>
+  </ProjectSession>
+  <Debugging>
+    <Watches Count="3">
+      <Item1>
+        <Expression Value="Points"/>
+      </Item1>
+      <Item2>
+        <Expression Value="ToolRegistry"/>
+      </Item2>
+      <Item3>
+        <Expression Value="MainScreen.Cursor"/>
+      </Item3>
+    </Watches>
+  </Debugging>
+</CONFIG>
