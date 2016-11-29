@@ -37,30 +37,10 @@ type
     procedure InitParameters;           override;
   end;
 
-  TZoomInTool = class(TTool)
-    FCurrentPoint: TDoublePoint;
-    constructor Create;
-    procedure MouseDown(X, Y: integer;
-      APenColor, ABrushColor: TColor);  override;
-    procedure MouseMove(X, Y: integer); override;
-    procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
-    procedure InitParameters;           override;
-  end;
-
-  TZoomOutTool = class(TTool)
-    FCurrentPoint: TDoublePoint;
-    constructor Create;
-    procedure MouseDown(X, Y: integer;
-      APenColor, ABrushColor: TColor);  override;
-    procedure MouseMove(X, Y: integer); override;
-    procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
-    procedure InitParameters;           override;
-  end;
-
-  TZoomToTool = class(TTool)
+  TZoomTool = class(TTool)
     FFirstPoint, FSecondPoint: TDoublePoint;
+    ZoomKoef: Double;
+    ZoomParameter: String;
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -68,6 +48,7 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer);        override;
     procedure InitParameters;           override;
+    procedure ChangeZoomParameter(Sender: TObject);
   end;
 
   TPolyLineTool = class(TTool)
@@ -200,7 +181,7 @@ begin
   for i := Low(Parameters) to High(Parameters) do begin
     FPanel.Height :=(
       FPanel.Height +
-      Parameters[1].FLabel.Height +
+      Parameters[i].FLabel.Height +
       Parameters[i].FComponent.Height);
   end;
 end;
@@ -226,113 +207,91 @@ begin
   Result := Figure;
 end;
 
+  { TZoomTool }
 
-  { TZoomInTool }
-
-constructor TZoomInTool.Create;
+constructor TZoomTool.Create;
 begin
   Inherited;
-  FIcon := 'imgs/ZoomIn.bmp';
+  FIcon := 'imgs/Zoom.bmp';
 end;
 
-procedure TZoomInTool.MouseDown(X, Y: integer; APenColor, ABrushColor: TColor);
+procedure TZoomTool.MouseDown(X, Y: integer; APenColor, ABrushColor: TColor);
 begin
-  FCurrentPoint := ScreenToWorld(X, Y);
-end;
-
-procedure TZoomInTool.MouseMove(X, Y: integer);
-begin
-  FCurrentPoint := ScreenToWorld(X, Y);
-end;
-
-procedure TZoomInTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer);
-begin
-  if scale * 2 <= 100 then begin
-    Scale := Scale * 2;
-    ChangeScreenCoords(
-      FCurrentPoint.X - ScreenToWorldX(X),
-      FCurrentPoint.Y - ScreenToWorldY(Y));
+  if ZoomParameter = '' then ZoomParameter := 'Увеличить';
+  case ZoomParameter of
+    'Увеличить': begin
+       ZoomKoef := 1.2;
+       FFirstPoint := ScreenToWorld(X, Y);
+    end;
+    'Уменьшить': begin
+      ZoomKoef := 0.8;
+      FFirstPoint := ScreenToWorld(X, Y);
+    end;
+    'Приблизить область': begin
+      Figure := TFrame.Create;
+      (Figure as TFrame).AddFirstPoint(X, Y);
+      FFirstPoint := ScreenToWorld(X, Y);
+    end;
   end;
 end;
 
-procedure TZoomInTool.InitParameters;
-begin
-  ParametersAvailable := False;
-end;
-
-  { TZoomOutTool }
-
-constructor TZoomOutTool.Create;
-begin
-  Inherited;
-  FIcon := 'imgs/ZoomOut.bmp';
-end;
-
-procedure TZoomOutTool.MouseDown(X, Y: integer; APenColor, ABrushColor: TColor);
-begin
-  FCurrentPoint := ScreenToWorld(X, Y);
-end;
-
-procedure TZoomOutTool.MouseMove(X, Y: integer);
-begin
-  FCurrentPoint := ScreenToWorld(X, Y);
-end;
-
-procedure TZoomOutTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer);
-begin
-  if scale / 2 >= 0.01 then begin
-    Scale := Scale / 2;
-    ChangeScreenCoords(
-      FCurrentPoint.X - ScreenToWorldX(X),
-      FCurrentPoint.Y - ScreenToWorldY(Y));
-  end;
-end;
-
-procedure TZoomOutTool.InitParameters;
-begin
-  ParametersAvailable := False;
-end;
-
-  { TZoomToTool }
-
-constructor TZoomToTool.Create;
-begin
-  Inherited;
-  FIcon := 'imgs/ZoomTo.bmp';
-end;
-
-procedure TZoomToTool.MouseDown(X, Y: integer; APenColor, ABrushColor: TColor);
-begin
-  Figure := TFrame.Create;
-  (Figure as TFrame).AddFirstPoint(X, Y);
-  FFirstPoint := ScreenToWorld(X, Y);
-end;
-
-procedure TZoomToTool.MouseMove(X, Y: integer);
+procedure TZoomTool.MouseMove(X, Y: integer);
 var
   i : integer;
 begin
-  (Figure as TFrame).AddSecondPoint(X, Y);
-  FSecondPoint := ScreenToWorld(X, Y);
+  case ZoomParameter of
+    'Приблизить область': begin
+      (Figure as TFrame).AddSecondPoint(X, Y);
+      FSecondPoint := ScreenToWorld(X, Y);
+    end;
+  end;
 end;
 
-procedure TZoomToTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer);
+procedure TZoomTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer);
 var
   ZoomWidth, ZoomHeigth, MidX, MidY: Double;
 begin
-  (Figure as TFrame).AddSecondPoint(X, Y);
-  ZoomWidth := abs(FSecondPoint.X - FFirstPoint.X);
-  ZoomHeigth := abs(FSecondPoint.Y - FFirstPoint.Y);
-  MidX := min(FFirstPoint.X, FSecondPoint.X);
-  MidY := min(FFirstPoint.Y, FSecondPoint.Y);
-  Scale := Min(AWidth / ZoomWidth, AHeight / ZoomHeigth);
-  UScale.SetScreenCoords(MidX, MidY);
-  Figure := nil;
+  case ZoomParameter of
+    'Увеличить': begin
+      if Scale * ZoomKoef <= 100 then begin
+        Scale := Scale * ZoomKoef;
+        ChangeScreenCoords(
+          FFirstPoint.X - ScreenToWorldX(X),
+          FFirstPoint.Y - ScreenToWorldY(Y));
+      end;
+    end;
+    'Уменьшить': begin
+      if Scale * ZoomKoef >= 0.01 then begin
+       Scale := Scale * ZoomKoef;
+       ChangeScreenCoords(
+         FFirstPoint.X - ScreenToWorldX(X),
+         FFirstPoint.Y - ScreenToWorldY(Y));
+      end;
+    end;
+    'Приблизить область': begin
+      (Figure as TFrame).AddSecondPoint(X, Y);
+      ZoomWidth := abs(FSecondPoint.X - FFirstPoint.X);
+      ZoomHeigth := abs(FSecondPoint.Y - FFirstPoint.Y);
+      MidX := min(FFirstPoint.X, FSecondPoint.X);
+      MidY := min(FFirstPoint.Y, FSecondPoint.Y);
+      Scale := Min(AWidth / ZoomWidth, AHeight / ZoomHeigth);
+      UScale.SetScreenCoords(MidX, MidY);
+      Figure := nil;
+    end;
+  end;
 end;
 
-procedure TZoomToTool.InitParameters;
+procedure TZoomTool.InitParameters;
 begin
-  ParametersAvailable := False;
+  ParametersAvailable := true;
+  AddParameter(TZoomParameter.Create(@ChangeZoomParameter));
+end;
+
+procedure TZoomTool.ChangeZoomParameter(Sender: TObject);
+begin
+  with Sender as TComboBox do begin
+    ZoomParameter := Text;
+  end;
 end;
 
   { THandTool }
@@ -621,55 +580,55 @@ end;
 
 constructor TRoundRectTool.Create;
 begin
-Inherited;
-FIcon := 'imgs/RoundRect.bmp';
+  Inherited;
+  FIcon := 'imgs/RoundRect.bmp';
 end;
 
 procedure TRoundRectTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
-Figure := TRoundRect.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle,
-  RadiusX, RadiusY);
-(Figure as TRoundRect).AddFirstPoint(X, Y);
+  Figure := TRoundRect.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle,
+    RadiusX, RadiusY);
+  (Figure as TRoundRect).AddFirstPoint(X, Y);
 end;
 
 procedure TRoundRectTool.MouseMove(X, Y: Integer);
 begin
-(Figure as TRoundRect).AddSecondPoint(X, Y);
+  (Figure as TRoundRect).AddSecondPoint(X, Y);
 end;
 
 procedure TRoundRectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
-begin
-(Figure as TRoundRect).AddSecondPoint(X, Y);
+  begin
+  (Figure as TRoundRect).AddSecondPoint(X, Y);
 end;
 
 procedure TRoundRectTool.InitParameters;
 begin
-ParametersAvailable := True;
-AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
-AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
-AddParameter(TBrushStyleParameter.Create(@ChangeBrushStyle));
-AddParameter(TRadiusXRoundRectParameter.Create(@ChangeRadiusX));
-AddParameter(TRadiusYRoundRectParameter.Create(@ChangeRadiusY));
+  ParametersAvailable := True;
+  AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
+  AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
+  AddParameter(TBrushStyleParameter.Create(@ChangeBrushStyle));
+  AddParameter(TRadiusXRoundRectParameter.Create(@ChangeRadiusX));
+  AddParameter(TRadiusYRoundRectParameter.Create(@ChangeRadiusY));
 end;
 
 procedure TRoundRectTool.ChangeLineWidth(Sender: TObject);
 begin
-FLineWidth := (Sender as TSpinEdit).Value;
+  FLineWidth := (Sender as TSpinEdit).Value;
 end;
 
 
 procedure TRoundRectTool.ChangeLineStyle(Sender: TObject);
 begin
-with Sender as TComboBox do begin
-  FLineStyle := TFPPenStyle(ItemIndex);
-end;
+  with Sender as TComboBox do begin
+    FLineStyle := TFPPenStyle(ItemIndex);
+  end;
 end;
 
 procedure TRoundRectTool.ChangeBrushStyle(Sender: TObject);
 begin
-with Sender as TComboBox do begin
-  FBrushStyle := TFPBrushStyle(ItemIndex);
-end;
+  with Sender as TComboBox do begin
+    FBrushStyle := TFPBrushStyle(ItemIndex);
+  end;
 end;
 
 procedure TRoundRectTool.ChangeRadiusX(Sender: TObject);
@@ -694,8 +653,6 @@ initialization
   RegisterTool(TLineTool.Create);
   RegisterTool(TPolygonTool.Create);
   RegisterTool(TRoundRectTool.Create);
-  RegisterTool(TZoomInTool.Create);
-  RegisterTool(TZoomOutTool.Create);
-  RegisterTool(TZoomToTool.Create);
+  RegisterTool(TZoomTool.Create);
 end.
 

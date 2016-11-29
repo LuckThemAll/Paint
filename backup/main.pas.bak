@@ -125,7 +125,6 @@ begin
     Parent := ToolsPanel;
     Caption := '';
     Width := 100;
-    Height:= 150;
     Left := 0;
     Top := ((Length(ToolRegistry) + 1) div 2) * 38 + 10;
     Color := clSilver;
@@ -184,7 +183,6 @@ begin
       ToolParameters.Visible := True
     else
       ToolParameters.Visible := False;
-    //CurrentTool.BrushColor := clWhite;
     MainScreen.Invalidate;
 end;
 
