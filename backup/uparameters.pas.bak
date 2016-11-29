@@ -47,7 +47,37 @@ type
     constructor Create(AChange: TChange);
   end;
 
+  { TRadiusXRoundRectParameter }
+
+  TRadiusXRoundRectParameter = class(TParameter)
+    constructor Create(AChange: TChange);
+  end;
+
+  { TRadiusYRoundRectParameter }
+
+  TRadiusYRoundRectParameter = class(TParameter)
+    constructor Create(AChange: TChange);
+  end;
+
 implementation
+
+constructor TZoomParameter.Create(AChange: TChange);
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Вид лупы';
+  FComponent := TComboBox.Create(nil);
+  with FComponent as TComboBox do begin
+    Items.Add('Увеличить');
+    Items.Add('Уменьшить');
+    Items.Add('Приблизить область');
+    AutoComplete := False;
+    ItemIndex := 2;
+    Width := 97;
+    Left:= 0;
+    OnChange := AChange;
+    ReadOnly := true;
+  end;
+end;
 
 constructor TBorderWidthParameter.Create(AChange: TChange);
 begin
@@ -77,9 +107,10 @@ begin
     Items.Add('─ • • ─ • •');
     AutoComplete := False;
     ItemIndex := 0;
-    Width := 87;
+    Width := 97;
     Left:= 0;
     OnChange := AChange;
+    ReadOnly := true;
   end;
 end;
 
@@ -97,8 +128,9 @@ begin
     Items.Add('Диагональная 2');
     Items.Add('Крестом');
     Items.Add('Наклонным крестом');
-    Width := 87;
+    Width := 97;
     ItemIndex := 0;
+    ReadOnly := true;
     OnChange := AChange;
   end;
 end;
@@ -117,20 +149,33 @@ begin
   end;
 end;
 
-constructor TZoomParameter.Create(AChange: TChange);
+constructor TRadiusXRoundRectParameter.Create(AChange: TChange);
 begin
   FLabel := TLabel.Create(Nil);
-  FLabel.Caption := 'Вид лупы';
-  FComponent := TComboBox.Create(nil);
-  with FComponent as TComboBox do begin
-    Items.Add('Приблизить');
-    Items.Add('Отдалить');
-    Items.Add('Выделение области');
-    Width := 87;
+  FLabel.Caption := 'Radius X';
+  FComponent := TSpinEdit.Create(nil);
+  with FComponent as TSpinEdit do begin
+    MaxValue := 100;
+    MinValue := 0;
+    Value := 0;
+    Width := 60;
     OnChange := AChange;
   end;
 end;
 
+constructor TRadiusYRoundRectParameter.Create(AChange: TChange);
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Radius Y';
+  FComponent := TSpinEdit.Create(nil);
+  with FComponent as TSpinEdit do begin
+    MaxValue := 100;
+    MinValue := 0;
+    Value := 0;
+    Width := 60;
+    OnChange := AChange;
+  end;
+end;
 
 end.
 

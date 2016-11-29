@@ -183,7 +183,6 @@ begin
       ToolParameters.Visible := True
     else
       ToolParameters.Visible := False;
-    //CurrentTool.BrushColor := clWhite;
     MainScreen.Invalidate;
 end;
 

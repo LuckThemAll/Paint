@@ -43,9 +43,9 @@ type
 
   { TZoomParameter }
 
- { TZoomParameter = class(TParameter)
+  TZoomParameter = class(TParameter)
     constructor Create(AChange: TChange);
-  end;             }
+  end;
 
   { TRadiusXRoundRectParameter }
 
@@ -60,6 +60,24 @@ type
   end;
 
 implementation
+
+constructor TZoomParameter.Create(AChange: TChange);
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Вид лупы';
+  FComponent := TComboBox.Create(nil);
+  with FComponent as TComboBox do begin
+    Items.Add('Увеличить');
+    Items.Add('Уменьшить');
+    Items.Add('Приблизить область');
+    AutoComplete := False;
+    ItemIndex := 0;
+    Width := 97;
+    Left:= 0;
+    OnChange := AChange;
+    ReadOnly := true;
+  end;
+end;
 
 constructor TBorderWidthParameter.Create(AChange: TChange);
 begin
@@ -92,6 +110,7 @@ begin
     Width := 97;
     Left:= 0;
     OnChange := AChange;
+    ReadOnly := true;
   end;
 end;
 
@@ -111,6 +130,7 @@ begin
     Items.Add('Наклонным крестом');
     Width := 97;
     ItemIndex := 0;
+    ReadOnly := true;
     OnChange := AChange;
   end;
 end;
