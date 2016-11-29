@@ -43,7 +43,19 @@ type
 
   { TZoomParameter }
 
-  TZoomParameter = class(TParameter)
+ { TZoomParameter = class(TParameter)
+    constructor Create(AChange: TChange);
+  end;             }
+
+  { TRadiusXRoundRectParameter }
+
+  TRadiusXRoundRectParameter = class(TParameter)
+    constructor Create(AChange: TChange);
+  end;
+
+  { TRadiusYRoundRectParameter }
+
+  TRadiusYRoundRectParameter = class(TParameter)
     constructor Create(AChange: TChange);
   end;
 
@@ -117,20 +129,33 @@ begin
   end;
 end;
 
-constructor TZoomParameter.Create(AChange: TChange);
+constructor TRadiusXRoundRectParameter.Create(AChange: TChange);
 begin
   FLabel := TLabel.Create(Nil);
-  FLabel.Caption := 'Вид лупы';
-  FComponent := TComboBox.Create(nil);
-  with FComponent as TComboBox do begin
-    Items.Add('Приблизить');
-    Items.Add('Отдалить');
-    Items.Add('Выделение области');
-    Width := 97;
+  FLabel.Caption := 'Radius X';
+  FComponent := TSpinEdit.Create(nil);
+  with FComponent as TSpinEdit do begin
+    MaxValue := 100;
+    MinValue := 0;
+    Value := 0;
+    Width := 60;
     OnChange := AChange;
   end;
 end;
 
+constructor TRadiusYRoundRectParameter.Create(AChange: TChange);
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Radius Y';
+  FComponent := TSpinEdit.Create(nil);
+  with FComponent as TSpinEdit do begin
+    MaxValue := 100;
+    MinValue := 0;
+    Value := 0;
+    Width := 60;
+    OnChange := AChange;
+  end;
+end;
 
 end.
 

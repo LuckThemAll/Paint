@@ -38,6 +38,15 @@ Type
     procedure Draw(Canvas: TCanvas); override;
   end;
 
+  TRoundRect = class(TTwoPointsFigure)
+    BrushColor: TColor;
+    BrushStyle: TFPBrushStyle;
+    RadiusX, RadiusY: integer;
+    constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
+      AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
+    procedure Draw(Canvas: TCanvas); override;
+  end;
+
   TEllipse = class(TTwoPointsFigure)
     BrushColor: TColor;
     BrushStyle: TFPBrushStyle;
@@ -130,6 +139,30 @@ begin
   Canvas.Brush.Style := BrushStyle;
   Canvas.Pen.Style   := PenStyle;
   Canvas.Rectangle(WorldToScreen(Bounds));
+end;
+
+  { TRoundRect }
+
+constructor TRoundRect.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
+   AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
+begin
+  PenColor := APenColor;
+  Width := AWidth;
+  PenStyle := APenStyle;
+  BrushColor:=ABrushColor;
+  BrushStyle:=ABrushStyle;
+  RadiusX := ARadiusX;
+  RadiusY := ARadiusY;
+end;
+
+procedure TRoundRect.Draw(Canvas: TCanvas);
+begin
+  Canvas.Pen.Color   := PenColor;
+  Canvas.Brush.Color := BrushColor;
+  Canvas.Pen.Width   := Width;
+  Canvas.Brush.Style := BrushStyle;
+  Canvas.Pen.Style   := PenStyle;
+  Canvas.RoundRect(WorldToScreen(Bounds), RadiusX, RadiusY);
 end;
 
   { TEllipse }
