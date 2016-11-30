@@ -192,10 +192,10 @@ var
 begin
   for i := 0 to High(Parameters) do begin
     with Parameters[i] do begin
-      FLabel.Top        := i * 50;
+      FLabel.Top        := i * 47;
       FLabel.Left       := 2;
       FLabel.Parent     := FPanel;
-      FComponent.Top    := i * 50 + FLabel.ClientHeight + 3;
+      FComponent.Top    := i * 47 + FLabel.ClientHeight;
       FComponent.Left   := 2;
       FComponent.Parent := FPanel;
     end;

@@ -8,7 +8,7 @@
       <Unit0>
         <Filename Value="PaintEmulator.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="22"/>
       </Unit0>
       <Unit1>
         <Filename Value="main.pas"/>
@@ -17,7 +17,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Main"/>
-        <UsageCount Value="21"/>
+        <TopLine Value="124"/>
+        <CursorPos X="42" Y="358"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -28,24 +30,27 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="AboutForm"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="22"/>
       </Unit2>
       <Unit3>
         <Filename Value="ufigures.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="UFigures"/>
         <EditorIndex Value="3"/>
-        <UsageCount Value="21"/>
+        <TopLine Value="52"/>
+        <CursorPos X="15" Y="74"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="utools.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="UTools"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="219"/>
-        <CursorPos X="36" Y="284"/>
-        <UsageCount Value="21"/>
+        <TopLine Value="181"/>
+        <CursorPos X="56" Y="198"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
@@ -53,18 +58,18 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="UScale"/>
         <EditorIndex Value="1"/>
-        <UsageCount Value="21"/>
+        <TopLine Value="217"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="uparameters.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="UParameters"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="47"/>
-        <CursorPos X="19" Y="74"/>
-        <UsageCount Value="21"/>
+        <TopLine Value="129"/>
+        <CursorPos X="18" Y="59"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit6>
       <Unit7>

@@ -38,6 +38,15 @@ Type
     procedure Draw(Canvas: TCanvas); override;
   end;
 
+  TRoundRect = class(TTwoPointsFigure)
+    BrushColor: TColor;
+    BrushStyle: TFPBrushStyle;
+    RadiusX, RadiusY: integer;
+    constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
+      AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
+    procedure Draw(Canvas: TCanvas); override;
+  end;
+
   TEllipse = class(TTwoPointsFigure)
     BrushColor: TColor;
     BrushStyle: TFPBrushStyle;
@@ -60,7 +69,7 @@ Type
     BrushColor: TColor;
     BrushStyle: TFPBrushStyle;
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
-      AWidth: integer; ABrushStyle: TFPBrushStyle);
+      AWidth: integer; ABrushStyle: TFPBrushStyle; ANumberOfAngles: Integer);
     procedure Draw(Canvas: TCanvas); override;
   end;
 
@@ -132,6 +141,30 @@ begin
   Canvas.Rectangle(WorldToScreen(Bounds));
 end;
 
+  { TRoundRect }
+
+constructor TRoundRect.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
+   AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
+begin
+  PenColor := APenColor;
+  Width := AWidth;
+  PenStyle := APenStyle;
+  BrushColor:=ABrushColor;
+  BrushStyle:=ABrushStyle;
+  RadiusX := ARadiusX;
+  RadiusY := ARadiusY;
+end;
+
+procedure TRoundRect.Draw(Canvas: TCanvas);
+begin
+  Canvas.Pen.Color   := PenColor;
+  Canvas.Brush.Color := BrushColor;
+  Canvas.Pen.Width   := Width;
+  Canvas.Brush.Style := BrushStyle;
+  Canvas.Pen.Style   := PenStyle;
+  Canvas.RoundRect(WorldToScreen(Bounds), RadiusX, RadiusY);
+end;
+
   { TEllipse }
 
 constructor TEllipse.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
@@ -183,13 +216,14 @@ end;
   { TPolygon }
 
 constructor TPolygon.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
-  AWidth: integer; ABrushStyle: TFPBrushStyle);
+  AWidth: integer; ABrushStyle: TFPBrushStyle; ANumberOfAngles: Integer);
 begin
   PenColor := APenColor;
   Width := AWidth;
   PenStyle := APenStyle;
   BrushStyle:= ABrushStyle;
   BrushColor:=ABrushColor;
+  NumberOfAngles:=ANumberOfAngles;
 end;
 
 procedure TPolygon.Draw(Canvas: TCanvas);

@@ -192,10 +192,10 @@ var
 begin
   for i := 0 to High(Parameters) do begin
     with Parameters[i] do begin
-      FLabel.Top        := i * 50;
+      FLabel.Top        := i * 47;
       FLabel.Left       := 2;
       FLabel.Parent     := FPanel;
-      FComponent.Top    := i * 50 + FLabel.ClientHeight + 3;
+      FComponent.Top    := i * 47;
       FComponent.Left   := 2;
       FComponent.Parent := FPanel;
     end;
@@ -580,55 +580,55 @@ end;
 
 constructor TRoundRectTool.Create;
 begin
-Inherited;
-FIcon := 'imgs/RoundRect.bmp';
+  Inherited;
+  FIcon := 'imgs/RoundRect.bmp';
 end;
 
 procedure TRoundRectTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
-Figure := TRoundRect.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle,
-  RadiusX, RadiusY);
-(Figure as TRoundRect).AddFirstPoint(X, Y);
+  Figure := TRoundRect.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle,
+    RadiusX, RadiusY);
+  (Figure as TRoundRect).AddFirstPoint(X, Y);
 end;
 
 procedure TRoundRectTool.MouseMove(X, Y: Integer);
 begin
-(Figure as TRoundRect).AddSecondPoint(X, Y);
+  (Figure as TRoundRect).AddSecondPoint(X, Y);
 end;
 
 procedure TRoundRectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
-begin
-(Figure as TRoundRect).AddSecondPoint(X, Y);
+  begin
+  (Figure as TRoundRect).AddSecondPoint(X, Y);
 end;
 
 procedure TRoundRectTool.InitParameters;
 begin
-ParametersAvailable := True;
-AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
-AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
-AddParameter(TBrushStyleParameter.Create(@ChangeBrushStyle));
-AddParameter(TRadiusXRoundRectParameter.Create(@ChangeRadiusX));
-AddParameter(TRadiusYRoundRectParameter.Create(@ChangeRadiusY));
+  ParametersAvailable := True;
+  AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
+  AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
+  AddParameter(TBrushStyleParameter.Create(@ChangeBrushStyle));
+  AddParameter(TRadiusXRoundRectParameter.Create(@ChangeRadiusX));
+  AddParameter(TRadiusYRoundRectParameter.Create(@ChangeRadiusY));
 end;
 
 procedure TRoundRectTool.ChangeLineWidth(Sender: TObject);
 begin
-FLineWidth := (Sender as TSpinEdit).Value;
+  FLineWidth := (Sender as TSpinEdit).Value;
 end;
 
 
 procedure TRoundRectTool.ChangeLineStyle(Sender: TObject);
 begin
-with Sender as TComboBox do begin
-  FLineStyle := TFPPenStyle(ItemIndex);
-end;
+  with Sender as TComboBox do begin
+    FLineStyle := TFPPenStyle(ItemIndex);
+  end;
 end;
 
 procedure TRoundRectTool.ChangeBrushStyle(Sender: TObject);
 begin
-with Sender as TComboBox do begin
-  FBrushStyle := TFPBrushStyle(ItemIndex);
-end;
+  with Sender as TComboBox do begin
+    FBrushStyle := TFPBrushStyle(ItemIndex);
+  end;
 end;
 
 procedure TRoundRectTool.ChangeRadiusX(Sender: TObject);
