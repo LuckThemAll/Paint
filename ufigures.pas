@@ -73,10 +73,6 @@ Type
     procedure Draw(Canvas: TCanvas); override;
   end;
 
- { TRoundRect = class(TTwoPointsFigure)
-    procedure DrawRoundRect(Canvas: TCanvas; ARadiusX, ARadiusY: integer);
-  end;  }
-
 
 implementation
 
