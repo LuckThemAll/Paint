@@ -147,6 +147,7 @@ begin
     Width := 60;
     OnChange := AChange;
   end;
+
 end;
 
 constructor TRadiusXRoundRectParameter.Create(AChange: TChange);

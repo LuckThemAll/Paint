@@ -428,6 +428,7 @@ constructor TPolygonTool.Create;
 begin
   Inherited;
   FIcon := 'imgs/Polygon.bmp';
+  FNumberOfAngles := 3;
 end;
 
 procedure TPolygonTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
