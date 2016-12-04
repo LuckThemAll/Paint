@@ -206,6 +206,7 @@ procedure TFrame.Draw(Canvas: TCanvas);
 begin
   Canvas.Pen.Color := clBlack;
   Canvas.Pen.Width := 1;
+  Canvas.Pen.Style   := psSolid;
   Canvas.Frame(WorldToScreen(Bounds));
 end;
 
