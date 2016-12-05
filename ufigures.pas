@@ -12,7 +12,10 @@ Type
     PenColor: TColor;
     PenStyle: TFPPenStyle;
     Width: Integer;
+    Selected: Boolean;
     procedure Draw(Canvas: TCanvas); virtual; abstract;
+    function IsPointInside(X, Y: integer): Boolean; virtual; abstract;
+    function IsIntersects(ABounds: TDoubleRect): Boolean;   virtual; abstract;
   end;
 
   TPolyLine = class(TFigure)
@@ -20,6 +23,8 @@ Type
     constructor Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
     procedure AddPoint(X, Y: Integer);
     procedure Draw(Canvas: TCanvas); override;
+    function IsPointInside(X, Y: integer): Boolean; override;
+    function IsIntersects(ABounds: TDoubleRect): Boolean;   override;
   end;
 
   { TTwoPointsFigure }
@@ -36,6 +41,8 @@ Type
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle);
     procedure Draw(Canvas: TCanvas); override;
+    function IsPointInside(X, Y: integer): Boolean; override;
+    function IsIntersects(ABounds: TDoubleRect): Boolean;   override;
   end;
 
   TRoundRect = class(TTwoPointsFigure)
@@ -45,6 +52,8 @@ Type
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
     procedure Draw(Canvas: TCanvas); override;
+    function IsPointInside(X, Y: integer): Boolean; override;
+    function IsIntersects(ABounds: TDoubleRect): Boolean;   override;
   end;
 
   TEllipse = class(TTwoPointsFigure)
@@ -53,11 +62,15 @@ Type
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle);
     procedure Draw(Canvas: TCanvas); override;
+    function IsPointInside(X, Y: integer): Boolean; override;
+    function IsIntersects(ABounds: TDoubleRect): Boolean;   override;
   end;
 
   TLine = class(TTwoPointsFigure)
     constructor Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
     procedure Draw(Canvas: TCanvas); override;
+    function IsPointInside(X, Y: integer): Boolean; override;
+    function IsIntersects(ABounds: TDoubleRect): Boolean;   override;
   end;
 
   TFrame = class(TTwoPointsFigure)
@@ -71,10 +84,23 @@ Type
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle; ANumberOfAngles: Integer);
     procedure Draw(Canvas: TCanvas); override;
+    function IsPointInside(X, Y: integer): Boolean; override;
+    function IsIntersects(ABounds: TDoubleRect): Boolean;   override;
   end;
+
+procedure SaveActualFigure(Figure: TFigure);
+
+var
+  Figures: array of TFigure;
 
 
 implementation
+
+procedure SaveActualFigure(Figure: TFigure);
+begin
+  SetLength(Figures, Length(Figures) + 1);
+  Figures[High(Figures)] := Figure;
+end;
 
 
   { PolyLine }
@@ -98,7 +124,47 @@ begin
   Canvas.Pen.Color   := PenColor;
   Canvas.Pen.Width   := Width;
   Canvas.Pen.Style   := PenStyle;
+  if Selected then begin
+    Canvas.Pen.Color   := clBlue;
+    Canvas.Pen.Width   := Width + 3;
+    Canvas.Pen.Style   := psDashDotDot;
+  end;
   Canvas.Polyline(WorldPointsToScreen(Points));
+end;
+
+function TPolyLine.IsPointInside(X, Y: integer): Boolean;
+var
+  i: integer;
+  TempPoints: array of TPoint;
+begin
+  Result := False;
+  TempPoints := WorldPointsToScreen(Points);
+  for i := Low(TempPoints) to High(TempPoints) do
+    if (TempPoints[i].X = X) and (TempPoints[i].Y = Y) then begin
+      Result := true;
+      Break;
+    end;
+end;
+
+function TPolyLine.IsIntersects(ABounds: TDoubleRect): Boolean;
+var
+  i: integer;
+  TempPoints: array of TPoint;
+  TempBounds: TDoubleRect;
+begin
+  Result := False;
+  TempBounds.Left   := Min(ABounds.Left, ABounds.Right);
+  TempBounds.Top    := Min(ABounds.Top, ABounds.Bottom);
+  TempBounds.Right  := Max(ABounds.Left, ABounds.Right);
+  TempBounds.Bottom := Max(ABounds.Top, ABounds.Bottom);
+  TempPoints := WorldPointsToScreen(Points);
+  for i := High(TempPoints) downto Low(TempPoints) do
+    if (((TempBounds.Left <= TempPoints[i].X) and (TempBounds.Top <= TempPoints[i].Y)) and
+       ((TempBounds.Right >= TempPoints[i].X) and (TempBounds.Bottom >= TempPoints[i].Y))) then
+      begin
+        Result := true;
+        Break;
+      end;
 end;
 
   { TTwoPointsFigure }
@@ -134,7 +200,46 @@ begin
   Canvas.Pen.Width   := Width;
   Canvas.Brush.Style := BrushStyle;
   Canvas.Pen.Style   := PenStyle;
+  if Selected then begin
+    Canvas.Pen.Color   := clBlue;
+    Canvas.Pen.Width   := Width + 3;
+    Canvas.Pen.Style   := psDashDotDot;
+    Canvas.Brush.Style := bsDiagCross;
+    Canvas.Brush.Color := clBlue;
+  end;
   Canvas.Rectangle(WorldToScreen(Bounds));
+end;
+
+function TRectangle.IsPointInside(X, Y: integer): Boolean;
+var
+  i: integer;
+  TempBounds: TRect;
+begin
+  Result := False;
+  TempBounds := WorldToScreen(Bounds);
+  if ((TempBounds.Left <= X) and (TempBounds.Top <= Y)) and
+     ((TempBounds.Right >= X) and (TempBounds.Bottom >= Y)) then begin
+    Result := true;
+  end;
+end;
+
+function TRectangle.IsIntersects(ABounds: TDoubleRect): Boolean;
+var
+  i: integer;
+  RectTempBounds: TRect;
+  TempBounds: TDoubleRect;
+begin
+  Result := False;
+  TempBounds.Left   := Min(ABounds.Left, ABounds.Right);
+  TempBounds.Top    := Min(ABounds.Top, ABounds.Bottom);
+  TempBounds.Right  := Max(ABounds.Left, ABounds.Right);
+  TempBounds.Bottom := Max(ABounds.Top, ABounds.Bottom);
+  RectTempBounds := WorldToScreen(Bounds);
+  if (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Left) and (TempBounds.Right >= RectTempBounds.Top))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Top) and (TempBounds.Right >= RectTempBounds.Right))) or
+     (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Bottom) and (TempBounds.Right >= RectTempBounds.Left))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Right) and (TempBounds.Right >= RectTempBounds.Bottom))) then
+       Result := true;
 end;
 
   { TRoundRect }
@@ -158,7 +263,46 @@ begin
   Canvas.Pen.Width   := Width;
   Canvas.Brush.Style := BrushStyle;
   Canvas.Pen.Style   := PenStyle;
+  if Selected then begin
+    Canvas.Pen.Color   := clBlue;
+    Canvas.Pen.Width   := Width + 3;
+    Canvas.Pen.Style   := psDashDotDot;
+    Canvas.Brush.Style := bsDiagCross;
+    Canvas.Brush.Color := clBlue;
+  end;
   Canvas.RoundRect(WorldToScreen(Bounds), RadiusX, RadiusY);
+end;
+
+function TRoundRect.IsPointInside(X, Y: integer): Boolean;
+var
+  i: integer;
+  TempBounds: TRect;
+begin
+  Result := False;
+  TempBounds := WorldToScreen(Bounds);
+  if ((TempBounds.Left <= X) and (TempBounds.Top <= Y)) and
+     ((TempBounds.Right >= X) and (TempBounds.Bottom >= Y)) then begin
+    Result := true;
+  end;
+end;
+
+function TRoundRect.IsIntersects(ABounds: TDoubleRect): Boolean;
+var
+  i: integer;
+  RectTempBounds: TRect;
+  TempBounds: TDoubleRect;
+begin
+  Result := False;
+  TempBounds.Left   := Min(ABounds.Left, ABounds.Right);
+  TempBounds.Top    := Min(ABounds.Top, ABounds.Bottom);
+  TempBounds.Right  := Max(ABounds.Left, ABounds.Right);
+  TempBounds.Bottom := Max(ABounds.Top, ABounds.Bottom);
+  RectTempBounds := WorldToScreen(Bounds);
+  if (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Left) and (TempBounds.Right >= RectTempBounds.Top))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Top) and (TempBounds.Right >= RectTempBounds.Right))) or
+     (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Bottom) and (TempBounds.Right >= RectTempBounds.Left))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Right) and (TempBounds.Right >= RectTempBounds.Bottom))) then
+       Result := true;
 end;
 
   { TEllipse }
@@ -180,7 +324,46 @@ begin
   Canvas.Pen.Width   := Width;
   Canvas.Brush.Style := BrushStyle;
   Canvas.Pen.Style   := PenStyle;
+  if Selected then begin
+    Canvas.Pen.Color   := clBlue;
+    Canvas.Pen.Width   := Width + 3;
+    Canvas.Pen.Style   := psDashDotDot;
+    Canvas.Brush.Style := bsDiagCross;
+    Canvas.Brush.Color := clBlue;
+  end;
   Canvas.Ellipse(WorldToScreen(Bounds));
+end;
+
+function TEllipse.IsPointInside(X, Y: integer): Boolean;
+var
+  i: integer;
+  TempBounds: TRect;
+begin
+  Result := False;
+  TempBounds := WorldToScreen(Bounds);
+  if ((TempBounds.Left <= X) and (TempBounds.Top <= Y)) and
+     ((TempBounds.Right >= X) and (TempBounds.Bottom >= Y)) then begin
+    Result := true;
+  end;
+end;
+
+function TEllipse.IsIntersects(ABounds: TDoubleRect): Boolean;
+var
+  i: integer;
+  RectTempBounds: TRect;
+  TempBounds: TDoubleRect;
+begin
+  Result := False;
+  TempBounds.Left   := Min(ABounds.Left, ABounds.Right);
+  TempBounds.Top    := Min(ABounds.Top, ABounds.Bottom);
+  TempBounds.Right  := Max(ABounds.Left, ABounds.Right);
+  TempBounds.Bottom := Max(ABounds.Top, ABounds.Bottom);
+  RectTempBounds := WorldToScreen(Bounds);
+  if (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Left) and (TempBounds.Right >= RectTempBounds.Top))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Top) and (TempBounds.Right >= RectTempBounds.Right))) or
+     (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Bottom) and (TempBounds.Right >= RectTempBounds.Left))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Right) and (TempBounds.Right >= RectTempBounds.Bottom))) then
+       Result := true;
 end;
 
   { TLine }
@@ -197,7 +380,46 @@ begin
   Canvas.Pen.Color   := PenColor;
   Canvas.Pen.Width   := Width;
   Canvas.Pen.Style   := PenStyle;
+  if Selected then begin
+    Canvas.Pen.Color   := clBlue;
+    Canvas.Pen.Width   := Width + 3;
+    Canvas.Pen.Style   := psDashDotDot;
+    Canvas.Brush.Style := bsDiagCross;
+    Canvas.Brush.Color := clBlue;
+  end;
   Canvas.Line(WorldToScreen(Bounds));
+end;
+
+function TLine.IsPointInside(X, Y: integer): Boolean;
+var
+  i: integer;
+  TempBounds: TRect;
+begin
+  Result := False;
+  TempBounds := WorldToScreen(Bounds);
+  if ((TempBounds.Left <= X) and (TempBounds.Top <= Y)) and
+     ((TempBounds.Right >= X) and (TempBounds.Bottom >= Y)) then begin
+    Result := true;
+  end;
+end;
+
+function TLine.IsIntersects(ABounds: TDoubleRect): Boolean;
+var
+  i: integer;
+  RectTempBounds: TRect;
+  TempBounds: TDoubleRect;
+begin
+  Result := False;
+  TempBounds.Left   := Min(ABounds.Left, ABounds.Right);
+  TempBounds.Top    := Min(ABounds.Top, ABounds.Bottom);
+  TempBounds.Right  := Max(ABounds.Left, ABounds.Right);
+  TempBounds.Bottom := Max(ABounds.Top, ABounds.Bottom);
+  RectTempBounds := WorldToScreen(Bounds);
+  if (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Left) and (TempBounds.Right >= RectTempBounds.Top))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Top) and (TempBounds.Right >= RectTempBounds.Right))) or
+     (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Bottom) and (TempBounds.Right >= RectTempBounds.Left))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Right) and (TempBounds.Right >= RectTempBounds.Bottom))) then
+       Result := true;
 end;
 
   { TFrame }
@@ -235,6 +457,13 @@ begin
   Canvas.Pen.Width   := Width;
   Canvas.Brush.Style := BrushStyle;
   Canvas.Pen.Style   := PenStyle;
+  if Selected then begin
+    Canvas.Pen.Color   := clBlue;
+    Canvas.Pen.Width   := Width + 3;
+    Canvas.Pen.Style   := psDashDotDot;
+    Canvas.Brush.Style := bsDiagCross;
+    Canvas.Brush.Color := clBlue;
+  end;
   begin
     MidlCoord.X := (Bounds.Left + Bounds.Right) / 2;
     MidlCoord.Y := (Bounds.Top + Bounds.Bottom) / 2;
@@ -248,19 +477,37 @@ begin
   Canvas.Polygon(WorldToScreen(Angles));
 end;
 
-  { TRoundRect }
-
-{procedure TRoundRect.DrawRoundRect(Canvas: TCanvas; ARadiusX, ARadiusY: Integer);
+function TPolygon.IsPointInside(X, Y: integer): Boolean;
+var
+  i: integer;
+  TempBounds: TRect;
 begin
-  Canvas.Pen.Color   := PenColor;
-  Canvas.Brush.Color := BrushColor;
-  Canvas.Pen.Width   := Width;
-  Canvas.Brush.Style := BrushStyle;
-  Canvas.Pen.Style   := PenStyle;
-  RadiusX:=5;
-  RadiusY:=5;
-  Canvas.RoundRect(WorldToScreen(Bounds), RadiusX, RadiusY);
-end;  }
+  Result := False;
+  TempBounds := WorldToScreen(Bounds);
+  if ((TempBounds.Left <= X) and (TempBounds.Top <= Y)) and
+     ((TempBounds.Right >= X) and (TempBounds.Bottom >= Y)) then begin
+    Result := true;
+  end;
+end;
+
+function TPolygon.IsIntersects(ABounds: TDoubleRect): Boolean;
+var
+  i: integer;
+  RectTempBounds: TRect;
+  TempBounds: TDoubleRect;
+begin
+  Result := False;
+  TempBounds.Left   := Min(ABounds.Left, ABounds.Right);
+  TempBounds.Top    := Min(ABounds.Top, ABounds.Bottom);
+  TempBounds.Right  := Max(ABounds.Left, ABounds.Right);
+  TempBounds.Bottom := Max(ABounds.Top, ABounds.Bottom);
+  RectTempBounds := WorldToScreen(Bounds);
+  if (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Left) and (TempBounds.Right >= RectTempBounds.Top))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Top)) and ((TempBounds.Bottom >= RectTempBounds.Top) and (TempBounds.Right >= RectTempBounds.Right))) or
+     (((TempBounds.Left <= RectTempBounds.Left) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Bottom) and (TempBounds.Right >= RectTempBounds.Left))) or
+     (((TempBounds.Left <= RectTempBounds.Right) and (TempBounds.Top <= RectTempBounds.Bottom)) and ((TempBounds.Bottom >= RectTempBounds.Right) and (TempBounds.Right >= RectTempBounds.Bottom))) then
+       Result := true;
+end;
 
 end.
 

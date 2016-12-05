@@ -148,6 +148,19 @@ type
     procedure ChangeRadiusY(Sender: TObject);
   end;
 
+  TSelectTool = class(TTool)
+    FFirstPoint, FSecondPoint: TDoublePoint;
+    ChooseParameter: String;
+    constructor Create;
+    procedure MouseDown(X, Y: integer;
+      APenColor, ABrushColor: TColor);  override;
+    procedure MouseMove(X, Y: integer); override;
+    procedure MouseUp(X, Y: integer;
+      AWidth, AHeight: Integer);        override;
+    procedure InitParameters;           override;
+    procedure ChangeChooseParameter(Sender: TObject);
+  end;
+
 
 var
   ToolRegistry: array of TTool;
@@ -646,6 +659,78 @@ begin
   end;
 end;
 
+  { TSelectTool }
+
+constructor TSelectTool.Create;
+begin
+  Inherited;
+  FIcon := 'imgs/Select.bmp';
+end;
+
+procedure TSelectTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
+begin
+  if ChooseParameter = '' then ChooseParameter := 'Выбрать точку';
+  case ChooseParameter of
+  'Выбрать область': begin
+    Figure := TFrame.Create;
+    (Figure as TFrame).AddFirstPoint(X, Y);
+    FFirstPoint := ScreenToWorld(X, Y);
+  end;
+  end;
+end;
+
+procedure TSelectTool.MouseMove(X, Y: Integer);
+begin
+  case ChooseParameter of
+    'Выбрать область': begin
+      (Figure as TFrame).AddSecondPoint(X, Y);
+      FSecondPoint := ScreenToWorld(X, Y);
+    end;
+  end;
+
+end;
+
+procedure TSelectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
+var
+  i: integer;
+begin
+  case ChooseParameter of
+    'Выбрать точку': begin
+      for i := High(Figures) downto Low(Figures) do
+        Figures[i].Selected := false;
+      for i := High(Figures) downto Low(Figures) do
+      if Figures[i].IsPointInside(X, Y) then begin
+        Figures[i].Selected := true;
+        Break;
+      end;
+    end;
+    'Выбрать область': begin
+      (Figure as TFrame).AddSecondPoint(X, Y);
+      FSecondPoint := ScreenToWorld(X, Y);
+      for i := High(Figures) downto Low(Figures) do
+        Figures[i].Selected := false;
+      for i := High(Figures) downto Low(Figures) do begin
+        if Figures[i].IsIntersects(DoubleRect(FFirstPoint, FSecondPoint)) then
+          Figures[i].Selected := True;
+      end;
+      Figure := nil;
+    end;
+  end;
+end;
+
+procedure TSelectTool.InitParameters;
+begin
+  ParametersAvailable := True;
+  AddParameter(TChooseParameter.Create(@ChangeChooseParameter));
+end;
+
+procedure TSelectTool.ChangeChooseParameter(Sender: TObject);
+begin
+  with Sender as TComboBox do begin
+    ChooseParameter := Text;
+  end;
+end;
+
 initialization
   RegisterTool(THandTool.Create);
   RegisterTool(TPolyLineTool.Create);
@@ -655,5 +740,6 @@ initialization
   RegisterTool(TPolygonTool.Create);
   RegisterTool(TRoundRectTool.Create);
   RegisterTool(TZoomTool.Create);
+  RegisterTool(TSelectTool.Create);
 end.
 

@@ -84,7 +84,7 @@ const
 var
   MainScreen: TMainScreen;
   WasMouseDown, MouseOnPaintBox: Boolean;
-  Figures: array of TFigure;
+  //Figures: array of TFigure;
   CurrentTool: TTool;
   Colors: array [0..34] of array [0..7] of integer;
   ToolParameters: TPanel;
@@ -161,12 +161,6 @@ begin
   ToolParameters.Visible := False;
 end;
 
-procedure SaveActualFigure(Figure: TFigure);
-begin
-  SetLength(Figures, Length(Figures) + 1);
-  Figures[High(Figures)] := Figure;
-end;
-
   { Btn }
 
 procedure TMainScreen.ToolClick(Sender: TObject);
@@ -214,7 +208,7 @@ var
 
 procedure Crutch;
 begin
-  if Figures <> nil then begin
+  if UFigures.Figures <> nil then begin
     ImageWidth := ImageCoords.Right - ImageCoords.Left + 15/Scale;
     ImageHeigth := ImageCoords.Bottom - ImageCoords.Top + 15/Scale;
     AScale := Min((PaintBox.Width - 15) / ImageWidth,
@@ -291,7 +285,7 @@ begin
   CurrentTool.MouseUp(X, Y, PaintBox.Width, PaintBox.Height);
   if CurrentTool.GetFigure <> nil then begin
     CurrentTool.GetFigure.Draw(PaintBox.Canvas);
-    SaveActualFigure(CurrentTool.GetFigure);
+    UFigures.SaveActualFigure(CurrentTool.GetFigure);
     UScale.UpdateBorderCoords(X, Y);
   end;
   MainScreen.Invalidate;
@@ -301,8 +295,8 @@ procedure TMainScreen.PaintBoxPaint(Sender: TObject);
 var
   i : Integer;
 begin
-  For i := Low(Figures) to High(Figures) do begin
-    Figures[i].Draw(PaintBox.Canvas);
+  For i := Low(UFigures.Figures) to High(UFigures.Figures) do begin
+    UFigures.Figures[i].Draw(PaintBox.Canvas);
   end;
   if (WasMouseDown) and (CurrentTool.GetFigure <> nil) then
     CurrentTool.GetFigure.Draw(PaintBox.Canvas);
