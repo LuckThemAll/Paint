@@ -365,7 +365,7 @@ begin
   begin
     MidlCoord.X := (Bounds.Left + Bounds.Right) / 2;
     MidlCoord.Y := (Bounds.Top + Bounds.Bottom) / 2;
-    R := Min(Bounds.Right - MidlCoord.X, Bounds.Bottom - MidlCoord.Y);
+    R := Min(abs(Bounds.Right - MidlCoord.X), abs(Bounds.Bottom - MidlCoord.Y));
     SetLength(Angles, NumberOfAngles);
     for i := 0 to NumberOfAngles - 1 do begin
       Angles[i].x := MidlCoord.X + (R*sin(i * 2 * pi / NumberOfAngles));
