@@ -23,7 +23,7 @@ type
       APenColor, ABrushColor: TColor);  virtual; abstract;
     procedure MouseMove(X, Y: integer); virtual; abstract;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        virtual; abstract;
+      AWidth, AHeight: Integer;  Shift: TShiftState); virtual; abstract;
   end;
 
   THandTool = class(TTool)
@@ -33,7 +33,7 @@ type
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
   end;
 
@@ -46,7 +46,7 @@ type
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
     procedure ChangeZoomParameter(Sender: TObject);
   end;
@@ -59,7 +59,7 @@ type
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
     procedure ChangeLineWidth(Sender: TObject);
     procedure ChangeLineStyle(Sender: TObject);
@@ -74,7 +74,7 @@ type
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
     procedure ChangeLineWidth(Sender: TObject);
     procedure ChangeLineStyle(Sender: TObject);
@@ -90,7 +90,7 @@ type
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
     procedure ChangeLineWidth(Sender: TObject);
     procedure ChangeLineStyle(Sender: TObject);
@@ -107,7 +107,7 @@ type
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
     procedure ChangeLineWidth(Sender: TObject);
     procedure ChangeLineStyle(Sender: TObject);
@@ -122,7 +122,7 @@ type
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
     procedure ChangeLineWidth(Sender: TObject);
     procedure ChangeLineStyle(Sender: TObject);
@@ -139,7 +139,7 @@ type
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
     procedure ChangeLineWidth(Sender: TObject);
     procedure ChangeLineStyle(Sender: TObject);
@@ -156,7 +156,7 @@ type
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer);        override;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
     procedure ChangeChooseParameter(Sender: TObject);
   end;
@@ -260,7 +260,7 @@ begin
   end;
 end;
 
-procedure TZoomTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer);
+procedure TZoomTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer; Shift: TShiftState);
 var
   ZoomWidth, ZoomHeigth, MidX, MidY: Double;
 begin
@@ -327,7 +327,7 @@ begin
     FCurrentPoint.Y - ScreenToWorldY(Y));
 end;
 
-procedure THandTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer);
+procedure THandTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer; Shift: TShiftState);
 begin
   ChangeScreenCoords(
     FCurrentPoint.X - ScreenToWorldX(X),
@@ -358,7 +358,7 @@ begin
   (Figure as TPolyline).AddPoint(X, Y);
 end;
 
-procedure TPolyLineTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
+procedure TPolyLineTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
 begin
   (Figure as TPolyline).AddPoint(X, Y);
 end;
@@ -402,7 +402,7 @@ begin
   (Figure as TRectangle).AddSecondPoint(X, Y);
 end;
 
-procedure TRectangleTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
+procedure TRectangleTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
 begin
   (Figure as TRectangle).AddSecondPoint(X, Y);
 end;
@@ -456,7 +456,7 @@ begin
   (Figure as TPolygon).AddSecondPoint(X, Y);
 end;
 
-procedure TPolygonTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
+procedure TPolygonTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
 begin
   (Figure as TPolygon).AddSecondPoint(X, Y);
 end;
@@ -514,7 +514,7 @@ begin
   (Figure as TEllipse).AddSecondPoint(X, Y);
 end;
 
-procedure TEllipseTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
+procedure TEllipseTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
 begin
   (Figure as TEllipse).AddSecondPoint(X, Y);
 end;
@@ -566,7 +566,7 @@ begin
   (Figure as TLine).AddSecondPoint(X, Y);
 end;
 
-procedure TLineTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
+procedure TLineTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
 begin
   (Figure as TLine).AddSecondPoint(X, Y);
 end;
@@ -610,7 +610,7 @@ begin
   (Figure as TRoundRect).AddSecondPoint(X, Y);
 end;
 
-procedure TRoundRectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
+procedure TRoundRectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
   begin
   (Figure as TRoundRect).AddSecondPoint(X, Y);
 end;
@@ -690,28 +690,30 @@ begin
 
 end;
 
-procedure TSelectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer);
+procedure TSelectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
 var
   i: integer;
 begin
   case ChooseParameter of
     'Выбрать точку': begin
-      for i := High(Figures) downto Low(Figures) do
-        Figures[i].Selected := false;
+      if not (ssCtrl in Shift) then
+        for i := High(Figures) downto Low(Figures) do
+          Figures[i].Selected := false;
       for i := High(Figures) downto Low(Figures) do
       if Figures[i].IsPointInside(X, Y) then begin
-        Figures[i].Selected := true;
+        Figures[i].Selected := not Figures[i].Selected;
         Break;
       end;
     end;
     'Выбрать область': begin
       (Figure as TFrame).AddSecondPoint(X, Y);
       FSecondPoint := ScreenToWorld(X, Y);
-      for i := High(Figures) downto Low(Figures) do
-        Figures[i].Selected := false;
+      if not (ssCtrl in Shift) then
+        for i := High(Figures) downto Low(Figures) do
+          Figures[i].Selected := false;
       for i := High(Figures) downto Low(Figures) do begin
-        if Figures[i].IsIntersects(DoubleRect(FFirstPoint, FSecondPoint)) then
-          Figures[i].Selected := True;
+        if Figures[i].IsIntersect(DoubleRect(FFirstPoint, FSecondPoint)) then
+          Figures[i].Selected := not Figures[i].Selected;
       end;
       Figure := nil;
     end;

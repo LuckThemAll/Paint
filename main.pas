@@ -282,7 +282,7 @@ procedure TMainScreen.PaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   WasMouseDown := false;
-  CurrentTool.MouseUp(X, Y, PaintBox.Width, PaintBox.Height);
+  CurrentTool.MouseUp(X, Y, PaintBox.Width, PaintBox.Height, Shift);
   if CurrentTool.GetFigure <> nil then begin
     CurrentTool.GetFigure.Draw(PaintBox.Canvas);
     UFigures.SaveActualFigure(CurrentTool.GetFigure);
