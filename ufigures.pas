@@ -33,6 +33,7 @@ Type
     Bounds : TDoubleRect;
     procedure AddFirstPoint(X, Y: Integer);
     procedure AddSecondPoint(X, Y: Integer);
+    procedure SetParamsForSelectedFigrs(ACanvas: TCanvas);
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function IsPointInside(X, Y: integer): Boolean;         override;
   end;
@@ -127,15 +128,18 @@ end;
 function TPolyLine.IsPointInside(X, Y: integer): Boolean;
 var
   i: integer;
-  TempPoints: array of TPoint;
+  A: array of TPoint;
+  DistanceMouseToPoint: integer;
 begin
   Result := False;
-  TempPoints := WorldPointsToScreen(Points);
-  for i := Low(TempPoints) to High(TempPoints) do
-    if (TempPoints[i].X = X) and (TempPoints[i].Y = Y) then begin
+  A := WorldPointsToScreen(Points);
+  for i := Low(A) to High(A) do begin
+    DistanceMouseToPoint := round(sqrt((A[i].X - X)**2 + (A[i].Y - Y)**2));
+    if DistanceMouseToPoint <= 5 then begin
       Result := true;
       Break;
     end;
+  end;
 end;
 
 function TPolyLine.IsIntersect(ABounds: TDoubleRect): Boolean;
@@ -143,6 +147,7 @@ var
   i: integer;
   TempPoints: array of TPoint;
   TempBounds: TDoubleRect;
+  P: TRect;
 begin
   Result := False;
   TempBounds.Left   := Min(ABounds.Left, ABounds.Right);
@@ -150,9 +155,10 @@ begin
   TempBounds.Right  := Max(ABounds.Left, ABounds.Right);
   TempBounds.Bottom := Max(ABounds.Top, ABounds.Bottom);
   TempPoints := WorldPointsToScreen(Points);
+  P := WorldToScreen(TempBounds);
   for i := High(TempPoints) downto Low(TempPoints) do
-    if (((TempBounds.Left <= TempPoints[i].X) and (TempBounds.Top <= TempPoints[i].Y)) and
-       ((TempBounds.Right >= TempPoints[i].X) and (TempBounds.Bottom >= TempPoints[i].Y))) then
+    if (((P.Left <= TempPoints[i].X) and (P.Top <= TempPoints[i].Y)) and
+       ((P.Right >= TempPoints[i].X) and (P.Bottom >= TempPoints[i].Y))) then
       begin
         Result := true;
         Break;
@@ -177,16 +183,11 @@ function TTwoPointsFigure.IsIntersect(ABounds: TDoubleRect): Boolean;
 var
   TempBounds: TDoubleRect;
 begin
-  Result := False;
-  TempBounds.Left   := Min(ABounds.Left, ABounds.Right);
-  TempBounds.Top    := Min(ABounds.Top, ABounds.Bottom);
-  TempBounds.Right  := Max(ABounds.Left, ABounds.Right);
-  TempBounds.Bottom := Max(ABounds.Top, ABounds.Bottom);
   Result := not (
-    (min(Bounds.Top,Bounds.Bottom) > max(TempBounds.Top,TempBounds.Bottom)) or
-    (max(Bounds.Top,Bounds.Bottom) < min(TempBounds.Top,TempBounds.Bottom)) or
-    (max(Bounds.Left,Bounds.Right) < min(TempBounds.Left,TempBounds.Right)) or
-    (min(Bounds.Left,Bounds.Right) > max(TempBounds.Left,TempBounds.Right)));
+    (min(Bounds.Top,Bounds.Bottom) > max(ABounds.Top,ABounds.Bottom)) or
+    (max(Bounds.Top,Bounds.Bottom) < min(ABounds.Top,ABounds.Bottom)) or
+    (max(Bounds.Left,Bounds.Right) < min(ABounds.Left,ABounds.Right)) or
+    (min(Bounds.Left,Bounds.Right) > max(ABounds.Left,ABounds.Right)));
 end;
 
 function TTwoPointsFigure.IsPointInside(X, Y: integer): Boolean;
@@ -204,6 +205,15 @@ begin
      ((TempBounds.Right >= X) and (TempBounds.Bottom >= Y)) then begin
     Result := true;
   end;
+end;
+
+procedure TTwoPointsFigure.SetParamsForSelectedFigrs(ACanvas: TCanvas);
+begin
+  ACanvas.Pen.Color   := clBlue;
+  ACanvas.Pen.Width   := Width + 3;
+  ACanvas.Pen.Style   := psDashDotDot;
+  ACanvas.Brush.Style := bsDiagCross;
+  ACanvas.Brush.Color := clBlue;
 end;
 
   { TRectangle }
@@ -225,13 +235,8 @@ begin
   Canvas.Pen.Width   := Width;
   Canvas.Brush.Style := BrushStyle;
   Canvas.Pen.Style   := PenStyle;
-  if Selected then begin
-    Canvas.Pen.Color   := clBlue;
-    Canvas.Pen.Width   := Width + 3;
-    Canvas.Pen.Style   := psDashDotDot;
-    Canvas.Brush.Style := bsDiagCross;
-    Canvas.Brush.Color := clBlue;
-  end;
+  if Selected then
+    SetParamsForSelectedFigrs(Canvas);
   Canvas.Rectangle(WorldToScreen(Bounds));
 end;
 
@@ -240,13 +245,13 @@ end;
 constructor TRoundRect.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
    AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
 begin
-  PenColor := APenColor;
-  Width := AWidth;
-  PenStyle := APenStyle;
-  BrushColor:=ABrushColor;
-  BrushStyle:=ABrushStyle;
-  RadiusX := ARadiusX;
-  RadiusY := ARadiusY;
+  PenColor   := APenColor;
+  Width      := AWidth;
+  PenStyle   := APenStyle;
+  BrushColor := ABrushColor;
+  BrushStyle := ABrushStyle;
+  RadiusX    := ARadiusX;
+  RadiusY    := ARadiusY;
 end;
 
 procedure TRoundRect.Draw(Canvas: TCanvas);
@@ -256,13 +261,8 @@ begin
   Canvas.Pen.Width   := Width;
   Canvas.Brush.Style := BrushStyle;
   Canvas.Pen.Style   := PenStyle;
-  if Selected then begin
-    Canvas.Pen.Color   := clBlue;
-    Canvas.Pen.Width   := Width + 3;
-    Canvas.Pen.Style   := psDashDotDot;
-    Canvas.Brush.Style := bsDiagCross;
-    Canvas.Brush.Color := clBlue;
-  end;
+  if Selected then
+    SetParamsForSelectedFigrs(Canvas);
   Canvas.RoundRect(WorldToScreen(Bounds), RadiusX, RadiusY);
 end;
 
@@ -272,11 +272,11 @@ end;
 constructor TEllipse.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
   AWidth: integer; ABrushStyle: TFPBrushStyle);
 begin
-  PenColor := APenColor;
-  Width := AWidth;
-  PenStyle := APenStyle;
-  BrushColor:=ABrushColor;
-  BrushStyle:=ABrushStyle;
+  PenColor   := APenColor;
+  Width      := AWidth;
+  PenStyle   := APenStyle;
+  BrushColor := ABrushColor;
+  BrushStyle := ABrushStyle;
 end;
 
 procedure TEllipse.Draw(Canvas: TCanvas);
@@ -286,13 +286,8 @@ begin
   Canvas.Pen.Width   := Width;
   Canvas.Brush.Style := BrushStyle;
   Canvas.Pen.Style   := PenStyle;
-  if Selected then begin
-    Canvas.Pen.Color   := clBlue;
-    Canvas.Pen.Width   := Width + 3;
-    Canvas.Pen.Style   := psDashDotDot;
-    Canvas.Brush.Style := bsDiagCross;
-    Canvas.Brush.Color := clBlue;
-  end;
+  if Selected then
+    SetParamsForSelectedFigrs(Canvas);
   Canvas.Ellipse(WorldToScreen(Bounds));
 end;
 
@@ -310,13 +305,8 @@ begin
   Canvas.Pen.Color   := PenColor;
   Canvas.Pen.Width   := Width;
   Canvas.Pen.Style   := PenStyle;
-  if Selected then begin
-    Canvas.Pen.Color   := clBlue;
-    Canvas.Pen.Width   := Width + 3;
-    Canvas.Pen.Style   := psDashDotDot;
-    Canvas.Brush.Style := bsDiagCross;
-    Canvas.Brush.Color := clBlue;
-  end;
+  if Selected then
+    SetParamsForSelectedFigrs(Canvas);
   Canvas.Line(WorldToScreen(Bounds));
 end;
 
@@ -326,7 +316,7 @@ procedure TFrame.Draw(Canvas: TCanvas);
 begin
   Canvas.Pen.Color := clBlack;
   Canvas.Pen.Width := 1;
-  Canvas.Pen.Style   := psSolid;
+  Canvas.Pen.Style := psSolid;
   Canvas.Frame(WorldToScreen(Bounds));
 end;
 
@@ -335,12 +325,12 @@ end;
 constructor TPolygon.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
   AWidth: integer; ABrushStyle: TFPBrushStyle; ANumberOfAngles: Integer);
 begin
-  PenColor := APenColor;
-  Width := AWidth;
-  PenStyle := APenStyle;
-  BrushStyle:= ABrushStyle;
-  BrushColor:=ABrushColor;
-  NumberOfAngles:=ANumberOfAngles;
+  PenColor       := APenColor;
+  Width          := AWidth;
+  PenStyle       := APenStyle;
+  BrushStyle     := ABrushStyle;
+  BrushColor     := ABrushColor;
+  NumberOfAngles := ANumberOfAngles;
 end;
 
 procedure TPolygon.Draw(Canvas: TCanvas);
@@ -356,11 +346,7 @@ begin
   Canvas.Brush.Style := BrushStyle;
   Canvas.Pen.Style   := PenStyle;
   if Selected then begin
-    Canvas.Pen.Color   := clBlue;
-    Canvas.Pen.Width   := Width + 3;
-    Canvas.Pen.Style   := psDashDotDot;
-    Canvas.Brush.Style := bsDiagCross;
-    Canvas.Brush.Color := clBlue;
+    SetParamsForSelectedFigrs(Canvas);
   end;
   begin
     MidlCoord.X := (Bounds.Left + Bounds.Right) / 2;
