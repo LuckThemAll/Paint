@@ -59,11 +59,6 @@ type
     constructor Create(AChange: TChange);
   end;
 
-  { TChooseParameter }
-
-  TChooseParameter = class(TParameter)
-    constructor Create(AChange: TChange);
-  end;
 
 implementation
 
@@ -184,20 +179,6 @@ begin
   end;
 end;
 
-constructor TChooseParameter.Create(AChange: TChange);
-begin
-  FLabel := TLabel.Create(Nil);
-  FLabel.Caption := 'Тип выбора';
-  FComponent := TComboBox.Create(nil);
-  with FComponent as TComboBox do begin
-    Items.Add('Выбрать точку');
-    Items.Add('Выбрать область');
-    Width := 97;
-    ItemIndex := 0;
-    ReadOnly := true;
-    OnChange := AChange;
-  end;
-end;
 
 end.
 

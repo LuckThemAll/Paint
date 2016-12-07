@@ -197,8 +197,10 @@ end;
 
 procedure TMainScreen.FormPaint(Sender: TObject);
 begin
-  if MainScreen.Height < 670 then
-    MainScreen.Height:=670;
+  if (MainScreen.Height < 700) then
+    MainScreen.Height := 700;
+  if (MainScreen.Width < 300) then
+    MainScreen.Width  := 300;
 end;
 
 procedure TMainScreen.FullExtentClick(Sender: TObject);

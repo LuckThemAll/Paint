@@ -5,7 +5,7 @@ unit UFigures;
 interface
 
 uses
-  Classes, SysUtils, Graphics, UScale, math, FPCanvas;
+  Classes, SysUtils, windows, Graphics, UScale, math, FPCanvas;
 
 Type
   TFigure = class
@@ -13,9 +13,11 @@ Type
     PenStyle: TFPPenStyle;
     Width: Integer;
     Selected: Boolean;
+    function GetBounds: TDoubleRect; virtual; abstract;
     procedure Draw(Canvas: TCanvas); virtual; abstract;
-    function IsPointInside(X, Y: integer): Boolean;         virtual; abstract;
+    function IsPointInside(ABounds: TDoubleRect): Boolean; virtual; abstract;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   virtual; abstract;
+    function AreSegmentsIntersect(A1, A2, B1, B2: TDoublePoint): Boolean;
   end;
 
   TPolyLine = class(TFigure)
@@ -23,19 +25,20 @@ Type
     constructor Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
     procedure AddPoint(X, Y: Integer);
     procedure Draw(Canvas: TCanvas); override;
-    function IsPointInside(X, Y: integer): Boolean; override;
+    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
-  end;
+end;
 
   { TTwoPointsFigure }
 
   TTwoPointsFigure = class(TFigure)
     Bounds : TDoubleRect;
+    function GetBounds: TDoubleRect; override;
     procedure AddFirstPoint(X, Y: Integer);
     procedure AddSecondPoint(X, Y: Integer);
     procedure SetParamsForSelectedFigrs(ACanvas: TCanvas);
-    function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
-    function IsPointInside(X, Y: integer): Boolean;         override;
+    function IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;
+      ARect: TDoubleRect): Boolean;
   end;
 
   TRectangle = class(TTwoPointsFigure)
@@ -44,6 +47,8 @@ Type
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle);
     procedure Draw(Canvas: TCanvas); override;
+    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
   end;
 
   TRoundRect = class(TTwoPointsFigure)
@@ -53,6 +58,8 @@ Type
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
     procedure Draw(Canvas: TCanvas); override;
+    function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
+    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
   end;
 
   TEllipse = class(TTwoPointsFigure)
@@ -61,11 +68,15 @@ Type
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle);
     procedure Draw(Canvas: TCanvas); override;
+    function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
+    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
   end;
 
   TLine = class(TTwoPointsFigure)
     constructor Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
     procedure Draw(Canvas: TCanvas); override;
+    function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
+    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
   end;
 
   TFrame = class(TTwoPointsFigure)
@@ -76,9 +87,12 @@ Type
     NumberOfAngles: integer;
     BrushColor: TColor;
     BrushStyle: TFPBrushStyle;
+    Angles: array of TDoublePoint;
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle; ANumberOfAngles: Integer);
     procedure Draw(Canvas: TCanvas); override;
+    function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
+    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
   end;
 
 procedure SaveActualFigure(Figure: TFigure);
@@ -95,6 +109,26 @@ begin
   Figures[High(Figures)] := Figure;
 end;
 
+  { TFigure }
+
+function TFigure.AreSegmentsIntersect(A1, A2, B1, B2: TDoublePoint): Boolean;
+var
+  V1,V2,V3,V4, Ax1, Ay1, Ax2, Ay2, Bx1, By1, Bx2, By2: Double;
+begin
+  Ax1 := A1.X;
+  Ay1 := A1.Y;
+  Ax2 := A2.X;
+  Ay2 := A2.Y;
+  Bx1 := B1.X;
+  By1 := B1.Y;
+  Bx2 := B2.X;
+  By2 := B2.Y;
+  V1 := (Bx2 - Bx1) * (Ay1 - By1) - (By2 - By1) * (Ax1 - Bx1);
+  V2 := (Bx2 - Bx1) * (Ay2 - By1) - (By2 - By1) * (Ax2 - Bx1);
+  V3 := (Ax2 - Ax1) * (By1 - Ay1) - (Ay2 - Ay1) * (Bx1 - Ax1);
+  V4 := (Ax2 - Ax1) * (By2 - Ay1) - (Ay2 - Ay1) * (Bx2 - Ax1);
+  Result := (V1 * V2 < 0) and (V3 * V4 < 0);
+end;
 
   { PolyLine }
 
@@ -125,17 +159,19 @@ begin
   Canvas.Polyline(WorldPointsToScreen(Points));
 end;
 
-function TPolyLine.IsPointInside(X, Y: integer): Boolean;
+function TPolyLine.IsPointInside(ABounds: TDoubleRect): Boolean;
 var
   i: integer;
   A: array of TPoint;
   DistanceMouseToPoint: integer;
+  B: TRect;
 begin
   Result := False;
   A := WorldPointsToScreen(Points);
+  B := WorldToScreen(ABounds);
   for i := Low(A) to High(A) do begin
-    DistanceMouseToPoint := round(sqrt((A[i].X - X)**2 + (A[i].Y - Y)**2));
-    if DistanceMouseToPoint <= 5 then begin
+    DistanceMouseToPoint := round(sqrt((A[i].X - B.Left)**2 + (A[i].Y - B.Top)**2));
+    if DistanceMouseToPoint <= ((Width div 2) + 1) then begin
       Result := true;
       Break;
     end;
@@ -145,25 +181,20 @@ end;
 function TPolyLine.IsIntersect(ABounds: TDoubleRect): Boolean;
 var
   i: integer;
-  TempPoints: array of TPoint;
-  TempBounds: TDoubleRect;
-  P: TRect;
 begin
   Result := False;
-  TempBounds.Left   := Min(ABounds.Left, ABounds.Right);
-  TempBounds.Top    := Min(ABounds.Top, ABounds.Bottom);
-  TempBounds.Right  := Max(ABounds.Left, ABounds.Right);
-  TempBounds.Bottom := Max(ABounds.Top, ABounds.Bottom);
-  TempPoints := WorldPointsToScreen(Points);
-  P := WorldToScreen(TempBounds);
-  for i := High(TempPoints) downto Low(TempPoints) do
-    if (((P.Left <= TempPoints[i].X) and (P.Top <= TempPoints[i].Y)) and
-       ((P.Right >= TempPoints[i].X) and (P.Bottom >= TempPoints[i].Y))) then
-      begin
-        Result := true;
-        Break;
-      end;
+  for i := Low(Points) to High(Points)-1 do
+    with ABounds do begin
+      if AreSegmentsIntersect(Points[i], Points[i+1], DoublePoint(Left, Bottom), TopLeft) or
+         AreSegmentsIntersect(Points[i], Points[i+1], TopLeft, DoublePoint(Right, Top)) or
+         AreSegmentsIntersect(Points[i], Points[i+1], DoublePoint(Right, Top), BottomRight) or
+         AreSegmentsIntersect(Points[i], Points[i+1], BottomRight, DoublePoint(Left, Bottom)) or
+         ((Points[i].Y <= max(Top, round(Bottom))) and (Points[i].Y >= min(Top, Bottom)) and
+         (Points[i].X <= max(Left, Right)) and (Points[i].X >= min(Left, Right)))
+      then Result := True;
+    end;
 end;
+
 
   { TTwoPointsFigure }
 
@@ -179,41 +210,36 @@ begin
                        ScreenToWorldX(X), ScreenToWorldY(Y));
 end;
 
-function TTwoPointsFigure.IsIntersect(ABounds: TDoubleRect): Boolean;
-var
-  TempBounds: TDoubleRect;
-begin
-  Result := not (
-    (min(Bounds.Top,Bounds.Bottom) > max(ABounds.Top,ABounds.Bottom)) or
-    (max(Bounds.Top,Bounds.Bottom) < min(ABounds.Top,ABounds.Bottom)) or
-    (max(Bounds.Left,Bounds.Right) < min(ABounds.Left,ABounds.Right)) or
-    (min(Bounds.Left,Bounds.Right) > max(ABounds.Left,ABounds.Right)));
-end;
-
-function TTwoPointsFigure.IsPointInside(X, Y: integer): Boolean;
-var
-  i: integer;
-  A, TempBounds: TRect;
-begin
-  Result := False;
-  A := WorldToScreen(Bounds);
-  TempBounds.Left   := Min(A.Left, A.Right);
-  TempBounds.Top    := Min(A.Top, A.Bottom);
-  TempBounds.Right  := Max(A.Left, A.Right);
-  TempBounds.Bottom := Max(A.Top, A.Bottom);
-  if ((TempBounds.Left <= X) and (TempBounds.Top <= Y)) and
-     ((TempBounds.Right >= X) and (TempBounds.Bottom >= Y)) then begin
-    Result := true;
-  end;
-end;
-
 procedure TTwoPointsFigure.SetParamsForSelectedFigrs(ACanvas: TCanvas);
 begin
   ACanvas.Pen.Color   := clBlue;
-  ACanvas.Pen.Width   := Width + 3;
-  ACanvas.Pen.Style   := psDashDotDot;
   ACanvas.Brush.Style := bsDiagCross;
   ACanvas.Brush.Color := clBlue;
+end;
+
+function TTwoPointsFigure.GetBounds: TDoubleRect;
+begin
+  with Result do begin
+    Top := Min(Bounds.Top, Bounds.Bottom);
+    Left := Min(Bounds.Left, Bounds.Right);
+    Bottom := Max(Bounds.Top, Bounds.Bottom);
+    Right := Max(Bounds.Left, Bounds.Right);
+  end;
+end;
+
+function TTwoPointsFigure.IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;
+  ARect: TDoubleRect): Boolean;
+begin
+ Result := false;
+  with ARect do begin
+    if AreSegmentsIntersect(AFirstpoint,ASecondpoint, DoublePoint(Left, Bottom), TopLeft) or
+       AreSegmentsIntersect(AFirstpoint,ASecondpoint, TopLeft, DoublePoint(Right, Top)) or
+       AreSegmentsIntersect(AFirstpoint,ASecondpoint, DoublePoint(Right, Top), BottomRight) or
+       AreSegmentsIntersect(AFirstpoint,ASecondpoint, BottomRight, DoublePoint(Left, Bottom)) or
+       ((AFirstpoint.Y <= max(Top,Bottom)) and (AFirstpoint.Y >= min(Top,Bottom)) and
+       (AFirstpoint.X <= max(Left,Right)) and (AFirstpoint.X >= min(Left,Right)))
+    then Result := True;
+  end;
 end;
 
   { TRectangle }
@@ -238,6 +264,30 @@ begin
   if Selected then
     SetParamsForSelectedFigrs(Canvas);
   Canvas.Rectangle(WorldToScreen(Bounds));
+end;
+
+function TRectangle.IsIntersect(ABounds: TDoubleRect): Boolean;
+var
+  Rect: HRGN;
+begin
+  with WorldToScreen(GetBounds) do begin
+    Rect := CreateRectRgn(Left, Top, Right, Bottom);
+  end;
+  Result := RectInRegion(Rect, WorldToScreen(ABounds));
+  DeleteObject(Rect);
+end;
+
+function TRectangle.IsPointInside(ABounds: TDoubleRect): Boolean;
+var
+  Point: TPoint;
+  Rect: HRGN;
+begin
+  with WorldToScreen(GetBounds) do begin
+    Rect := CreateRectRgn(Left, Top, Right, Bottom);
+  end;
+  Point := WorldToScreen(DoublePoint(ABounds.Left, ABounds.Top));
+  Result := PtInRegion(Rect, Point.X, Point.Y);
+  DeleteObject(Rect);
 end;
 
   { TRoundRect }
@@ -266,6 +316,30 @@ begin
   Canvas.RoundRect(WorldToScreen(Bounds), RadiusX, RadiusY);
 end;
 
+function TRoundRect.IsIntersect(ABounds: TDoubleRect): Boolean;
+var
+  RoundRect: HRGN;
+begin
+  with WorldToScreen(GetBounds) do begin
+    RoundRect := CreateRoundRectRgn(Left, Top, Right, Bottom, RadiusX, RadiusY);
+  end;
+  Result := RectInRegion(RoundRect, WorldToScreen(ABounds));
+  DeleteObject(RoundRect);
+end;
+
+function TRoundRect.IsPointInside(ABounds: TDoubleRect): Boolean;
+var
+  Point: TPoint;
+  RoundRect: HRGN;
+begin
+  with WorldToScreen(GetBounds) do begin
+    RoundRect := CreateRoundRectRgn(Left, Top, Right, Bottom, RadiusX, RadiusY);
+  end;
+  Point := WorldToScreen(DoublePoint(ABounds.Left, ABounds.Top));
+  Result := PtInRegion(RoundRect, Point.X, Point.Y);
+  DeleteObject(RoundRect);
+end;
+
 
   { TEllipse }
 
@@ -291,6 +365,30 @@ begin
   Canvas.Ellipse(WorldToScreen(Bounds));
 end;
 
+function TEllipse.IsIntersect(ABounds: TDoubleRect): Boolean;
+var
+  Rect: HRGN;
+begin
+  with WorldToScreen(GetBounds) do begin
+    Rect := CreateEllipticRgn(Left, Top, Right, Bottom);
+  end;
+  Result := RectInRegion(Rect, WorldToScreen(ABounds));
+  DeleteObject(Rect);
+end;
+
+function TEllipse.IsPointInside(ABounds: TDoubleRect): Boolean;
+var
+  Point: TPoint;
+  Ellipse: HRGN;
+begin
+  with WorldToScreen(GetBounds) do begin
+    Ellipse := CreateEllipticRgn(Left, Top, Right, Bottom);
+  end;
+  Point := WorldToScreen(DoublePoint(ABounds.Left, ABounds.Top));
+  Result := PtInRegion(Ellipse, Point.X, Point.Y);
+  DeleteObject(Ellipse);
+end;
+
   { TLine }
 
 constructor TLine.Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
@@ -308,6 +406,27 @@ begin
   if Selected then
     SetParamsForSelectedFigrs(Canvas);
   Canvas.Line(WorldToScreen(Bounds));
+end;
+
+function TLine.IsPointInside(ABounds: TDoubleRect): Boolean;
+var
+  B: TDoubleRect;
+  Delta: integer = 2;
+begin
+  Result := false;
+  B.Left   := min(ABounds.Left, ABounds.Right) - Delta;
+  B.Top    := min(ABounds.Top, ABounds.Bottom) - Delta;
+  B.Right  := min(ABounds.Left, ABounds.Right) + Delta;
+  B.Bottom := min(ABounds.Top, ABounds.Bottom) + Delta;
+ if IsRectIntersectSegment(GetBounds.TopLeft, GetBounds.BottomRight, B) then
+   Result := true;
+end;
+
+function TLine.IsIntersect(ABounds: TDoubleRect): Boolean;
+begin
+  Result := false;
+ if IsRectIntersectSegment(Bounds.TopLeft, Bounds.BottomRight, ABounds) then
+   Result := true;
 end;
 
   { TFrame }
@@ -338,7 +457,6 @@ var
   i: Integer;
   MidlCoord: TDoublePoint;
   R: Double;
-  Angles: array of TDoublePoint;
 begin
   Canvas.Pen.Color   := PenColor;
   Canvas.Brush.Color := BrushColor;
@@ -359,6 +477,32 @@ begin
     end;
   end;
   Canvas.Polygon(WorldToScreen(Angles));
+end;
+
+function TPolygon.IsIntersect(ABounds: TDoubleRect): Boolean;
+var
+  Polygon: HRGN;
+  Points: array of TPoint;
+begin
+  SetLength(Points, NumberOfAngles);
+  Points := WorldPointsToScreen(Angles);
+  Polygon := CreatePolygonRgn(Points[0], Length(Points), WINDING);
+  Result := RectInRegion(Polygon, WorldToScreen(ABounds));
+  DeleteObject(Polygon);
+end;
+
+function TPolygon.IsPointInside(ABounds: TDoubleRect): Boolean;
+var
+  Polygon: HRGN;
+  Points: array of TPoint;
+  Point: TPoint;
+begin
+  SetLength(Points, NumberOfAngles);
+  Points := WorldPointsToScreen(Angles);
+  Polygon := CreatePolygonRgn(Points[0], Length(Points), WINDING);
+  Point := WorldToScreen(DoublePoint(ABounds.Left, ABounds.Top));
+  Result := PtInRegion(Polygon, Point.x, Point.y);
+  DeleteObject(Polygon);
 end;
 
 

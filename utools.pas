@@ -150,7 +150,6 @@ type
 
   TSelectTool = class(TTool)
     FFirstPoint, FSecondPoint: TDoublePoint;
-    ChooseParameter: String;
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -158,7 +157,6 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
-    procedure ChangeChooseParameter(Sender: TObject);
   end;
 
 
@@ -669,69 +667,39 @@ end;
 
 procedure TSelectTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
-  if ChooseParameter = '' then ChooseParameter := 'Выбрать точку';
-  case ChooseParameter of
-  'Выбрать область': begin
-    Figure := TFrame.Create;
-    (Figure as TFrame).AddFirstPoint(X, Y);
-    FFirstPoint := ScreenToWorld(X, Y);
-  end;
-  end;
+  Figure := TFrame.Create;
+  (Figure as TFrame).AddFirstPoint(X, Y);
+  FFirstPoint := ScreenToWorld(X, Y);
 end;
 
 procedure TSelectTool.MouseMove(X, Y: Integer);
 begin
-  case ChooseParameter of
-    'Выбрать область': begin
-      (Figure as TFrame).AddSecondPoint(X, Y);
-      FSecondPoint := ScreenToWorld(X, Y);
-    end;
-  end;
-
+  (Figure as TFrame).AddSecondPoint(X, Y);
+  FSecondPoint := ScreenToWorld(X, Y);
 end;
 
 procedure TSelectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
 var
   i: integer;
 begin
-  case ChooseParameter of
-    'Выбрать точку': begin
-      if not (ssCtrl in Shift) then
-        for i := High(Figures) downto Low(Figures) do
-          Figures[i].Selected := false;
-      for i := High(Figures) downto Low(Figures) do
-      if Figures[i].IsPointInside(X, Y) then begin
-        Figures[i].Selected := not Figures[i].Selected;
-        Break;
-      end;
-    end;
-    'Выбрать область': begin
-      (Figure as TFrame).AddSecondPoint(X, Y);
-      FSecondPoint := ScreenToWorld(X, Y);
-      if not (ssCtrl in Shift) then
-        for i := High(Figures) downto Low(Figures) do
-          Figures[i].Selected := false;
-      for i := High(Figures) downto Low(Figures) do begin
-        if Figures[i].IsIntersect(DoubleRect(FFirstPoint, FSecondPoint)) then
-          Figures[i].Selected := not Figures[i].Selected;
-      end;
-      Figure := nil;
-    end;
+  (Figure as TFrame).AddSecondPoint(X, Y);
+  FSecondPoint := ScreenToWorld(X, Y);
+  if not (ssCtrl in Shift) then
+    for i := High(Figures) downto Low(Figures) do
+      Figures[i].Selected := false;
+  for i := High(Figures) downto Low(Figures) do begin
+    if Figures[i].IsIntersect(DoubleRect(FFirstPoint, FSecondPoint)) or
+       Figures[i].IsPointInside(DoubleRect(FFirstPoint, FSecondPoint)) then
+         Figures[i].Selected := not Figures[i].Selected;
   end;
+  Figure := nil;
 end;
 
 procedure TSelectTool.InitParameters;
 begin
-  ParametersAvailable := True;
-  AddParameter(TChooseParameter.Create(@ChangeChooseParameter));
+  ParametersAvailable := False;
 end;
 
-procedure TSelectTool.ChangeChooseParameter(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    ChooseParameter := Text;
-  end;
-end;
 
 initialization
   RegisterTool(THandTool.Create);

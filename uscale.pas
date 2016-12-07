@@ -33,6 +33,8 @@ type
 
 operator + (ADoublePointA, ADoublePointB: TDoublePoint): TDoublePoint;
 operator + (APoint: TPoint; ADoublePoint: TDoublePoint): TDoublePoint;
+operator + (ADoublePoint: TDoublePoint; AInteger: integer): TDoublePoint;
+operator + (APoint: TPoint; AInteger: integer): TPoint;
 
 operator - (ADoublePointA, ADoublePointB: TDoublePoint): TDoublePoint;
 
@@ -47,6 +49,7 @@ function DoubleRect(ATopLeft, ABottomRight: TDoublePoint): TDoubleRect;
 function DoubleRect(ALeft, ATop, ARight, ABottom: Double): TDoubleRect;
 function WorldPointsToScreen(APoints: array of TDoublePoint): TArrayOfTpoint;
 function WorldToScreen(ADoubleRect: TDoubleRect): TRect;
+function WorldToScreen(ADoublePoint: TDoublePoint): TPoint;
 function WorldToScreen(AVertices: array of TDoublePoint): TArrayOfTpoint;
 function ScreenToWorld(AX, AY: Integer): TDoublePoint;
 function ScreenToWorldX(AX: Integer): Double;
@@ -82,6 +85,18 @@ operator + (APoint: TPoint; ADoublePoint: TDoublePoint): TDoublePoint;
 begin
   Result.X := APoint.x + ADoublePoint.X;
   Result.Y := APoint.y + ADoublePoint.Y;
+end;
+
+operator + (ADoublePoint: TDoublePoint; AInteger: integer): TDoublePoint;
+begin
+  Result.X := ADoublePoint.X + AInteger;
+  Result.Y := ADoublePoint.Y + AInteger;
+end;
+
+operator + (APoint: TPoint; AInteger: integer): TPoint;
+begin
+  Result.X := APoint.X + AInteger;
+  Result.Y := APoint.Y + AInteger;
 end;
 
 operator - (ADoublePointA, ADoublePointB: TDoublePoint): TDoublePoint;
