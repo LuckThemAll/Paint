@@ -20,6 +20,10 @@ type
     BrushColorPanel: TPanel;
     BlackSquare: TPanel;
     FullExtent: TMenuItem;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
     ScaleEdit: TFloatSpinEdit;
     ScrollBarRight: TScrollBar;
     ScrollBarBottom: TScrollBar;
@@ -282,6 +286,9 @@ end;
 
 procedure TMainScreen.PaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
+var
+  i: integer;
+  b: TDoubleRect;
 begin
   WasMouseDown := false;
   CurrentTool.MouseUp(X, Y, PaintBox.Width, PaintBox.Height, Shift);
@@ -290,6 +297,19 @@ begin
     UFigures.SaveActualFigure(CurrentTool.GetFigure);
     UScale.UpdateBorderCoords(X, Y);
   end;
+  {for i := 0 to High(Figures) do begin
+      b := Figures[i].GetBounds;
+      if i = 0 then
+        ImageCoords := b;
+      with b do begin
+        UpdateBorderCoords(Left, Top);
+        UpdateBorderCoords(Right, Bottom);
+      end;
+      Label1.Caption:=FloatToStr(ImageCoords.Left);
+    Label2.Caption:=FloatToStr(ImageCoords.Top);
+    Label3.Caption:=FloatToStr(ImageCoords.Right);
+    Label4.Caption:=FloatToStr(ImageCoords.Bottom);
+    end;}
   MainScreen.Invalidate;
 end;
 
@@ -308,7 +328,7 @@ begin
                           ScreenToWorld(PaintBox.Width, PaintBox.Height)));
   UScale.SetCoordsForBars(CanvasCoords, ImageCoords);
   if MouseOnPaintBox then
-    SetScrollBarsParameters(CanvasCoords)
+    SetScrollBarsParameters(CanvasCoords);
 end;
 
 procedure TMainScreen.SetScrollBarsParameters(ARect: TDoubleRect);

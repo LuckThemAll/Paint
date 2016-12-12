@@ -15,6 +15,7 @@ Type
     Selected: Boolean;
     function GetBounds: TDoubleRect; virtual; abstract;
     procedure Draw(Canvas: TCanvas); virtual; abstract;
+    procedure Move(ADoublePoint: TDoublePoint); virtual; abstract;
     function IsPointInside(ABounds: TDoubleRect): Boolean; virtual; abstract;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   virtual; abstract;
     function AreSegmentsIntersect(A1, A2, B1, B2: TDoublePoint): Boolean;
@@ -23,8 +24,10 @@ Type
   TPolyLine = class(TFigure)
     Points: array of TDoublePoint;
     constructor Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
+    function GetBounds: TDoubleRect; override;
     procedure AddPoint(X, Y: Integer);
     procedure Draw(Canvas: TCanvas); override;
+    procedure Move(ADoublePoint: TDoublePoint); override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
 end;
@@ -37,6 +40,7 @@ end;
     procedure AddFirstPoint(X, Y: Integer);
     procedure AddSecondPoint(X, Y: Integer);
     procedure SetParamsForSelectedFigrs(ACanvas: TCanvas);
+    procedure Move(ADoublePoint: TDoublePoint); override;
     function IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;
       ARect: TDoubleRect): Boolean;
   end;
@@ -195,6 +199,28 @@ begin
     end;
 end;
 
+procedure TPolyLine.Move(ADoublePoint: TDoublePoint);
+var
+  i: integer;
+begin
+  for i := Low(Points) to High(Points) do
+    Points[i] += ADoublePoint;
+end;
+
+function TPolyLine.GetBounds: TDoubleRect;
+var
+  i: integer;
+begin
+  for i := 0 to High(Points) do
+    with Points[i], Result do
+    begin
+      Left := min(X, Left);
+      Right := max(X, Right);
+      Top := min(Y, Top);
+      Bottom := max(Y, Bottom);
+    end;
+end;
+
 
   { TTwoPointsFigure }
 
@@ -240,6 +266,12 @@ begin
        (AFirstpoint.X <= max(Left,Right)) and (AFirstpoint.X >= min(Left,Right)))
     then Result := True;
   end;
+end;
+
+procedure TTwoPointsFigure.Move(ADoublePoint: TDoublePoint);
+begin
+  Bounds.BottomRight += ADoublePoint;
+  Bounds.TopLeft += ADoublePoint;
 end;
 
   { TRectangle }
@@ -455,8 +487,8 @@ end;
 procedure TPolygon.Draw(Canvas: TCanvas);
 var
   i: Integer;
-  MidlCoord: TDoublePoint;
   R: Double;
+  MidlCoord: TDoublePoint;
 begin
   Canvas.Pen.Color   := PenColor;
   Canvas.Brush.Color := BrushColor;

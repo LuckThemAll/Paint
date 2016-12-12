@@ -319,17 +319,33 @@ begin
 end;
 
 procedure THandTool.MouseMove(X, Y: integer);
+var
+  i, j: Integer;
+  Selected: Boolean;
+  mem: TDoublePoint;
 begin
-  ChangeScreenCoords(
-    FCurrentPoint.X - ScreenToWorldX(X),
-    FCurrentPoint.Y - ScreenToWorldY(Y));
+  Selected:=False;
+  mem := (ScreenToWorld(X, Y) - FCurrentPoint);
+  for i := Low(Figures) to High(Figures) do
+    if Figures[i].Selected then
+      Selected:=True;
+  if Selected then
+  for i := Low(Figures) to High(Figures) do
+    if Figures[i].Selected then
+      Figures[i].Move(mem);
+  if not Selected then
+    ChangeScreenCoords(
+      FCurrentPoint.X - ScreenToWorldX(X),
+      FCurrentPoint.Y - ScreenToWorldY(Y))
+  else
+    FCurrentPoint := ScreenToWorld(X, Y);
 end;
 
 procedure THandTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer; Shift: TShiftState);
 begin
-  ChangeScreenCoords(
+  {ChangeScreenCoords(
     FCurrentPoint.X - ScreenToWorldX(X),
-    FCurrentPoint.Y - ScreenToWorldY(Y));
+    FCurrentPoint.Y - ScreenToWorldY(Y));}
 end;
 
 procedure THandTool.InitParameters;

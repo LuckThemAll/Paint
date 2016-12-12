@@ -57,7 +57,7 @@ function ScreenToWorldY(AY: Integer): Double;
 procedure ChangeScreenCoords(AX, AY: Double);
 procedure SetScreenCoords(AX, AY: Double);
 procedure SetScale(AScale: Double; AMidX, AMidY: integer);
-procedure UpdateBorderCoords(AX, AY: integer);
+procedure UpdateBorderCoords(AX, AY: Double);
 procedure UpdateCanvasCoords(ARect: TDoubleRect);
 procedure SetCoordsForBars(ACanvasCoords, AImageCoords: TDoubleRect);
 
@@ -182,16 +182,16 @@ begin
     TempMidCoords.Y - ScreenToWorldY(AMidY));
 end;
 
-procedure UpdateBorderCoords(AX, AY: integer);
+procedure UpdateBorderCoords(AX, AY: Double);
 begin
-  if ImageCoords.Left > ScreenToWorldX(AX) then
-    ImageCoords.Left := ScreenToWorldX(AX);
-  if ImageCoords.Top > ScreenToWorldY(AY) then
-    ImageCoords.Top := ScreenToWorldY(AY);
-  if ImageCoords.Right < ScreenToWorldX(AX) then
-    ImageCoords.Right := ScreenToWorldX(AX);
-  if ImageCoords.Bottom < ScreenToWorldY(AY) then
-    ImageCoords.Bottom := ScreenToWorldY(AY);
+  if ImageCoords.Left > ScreenToWorldX(round(AX)) then
+    ImageCoords.Left := ScreenToWorldX(round(AX));
+  if ImageCoords.Top > ScreenToWorldY(round(AY)) then
+    ImageCoords.Top := ScreenToWorldY(round(AY));
+  if ImageCoords.Right < ScreenToWorldX(round(AX)) then
+    ImageCoords.Right := ScreenToWorldX(round(AX));
+  if ImageCoords.Bottom < ScreenToWorldY(round(AY)) then
+    ImageCoords.Bottom := ScreenToWorldY(round(AY));
 end;
 
 procedure UpdateCanvasCoords(ARect: TDoubleRect);
