@@ -267,7 +267,6 @@ procedure TMainScreen.PaintBoxMouseDown(Sender: TObject; Button: TMouseButton;
 begin
   WasMouseDown := true;
   CurrentTool.MouseDown(X, Y, PenColorPanel.Color, BrushColorPanel.Color);
-    UScale.UpdateBorderCoords(X, Y);
   MainScreen.Invalidate;
 end;
 
@@ -291,21 +290,16 @@ begin
   if CurrentTool.GetFigure <> nil then begin
     CurrentTool.GetFigure.Draw(PaintBox.Canvas);
     UFigures.SaveActualFigure(CurrentTool.GetFigure);
-    UScale.UpdateBorderCoords(X, Y);
   end;
-  {for i := 0 to High(Figures) do begin
-      b := Figures[i].GetBounds;
+  for i := 0 to High(Figures) do begin
+      b := Figures[i].Bounds;
       if i = 0 then
         ImageCoords := b;
       with b do begin
         UpdateBorderCoords(Left, Top);
         UpdateBorderCoords(Right, Bottom);
       end;
-      Label1.Caption:=FloatToStr(ImageCoords.Left);
-    Label2.Caption:=FloatToStr(ImageCoords.Top);
-    Label3.Caption:=FloatToStr(ImageCoords.Right);
-    Label4.Caption:=FloatToStr(ImageCoords.Bottom);
-    end;}
+  end;
   MainScreen.Invalidate;
 end;
 

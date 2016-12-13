@@ -184,14 +184,14 @@ end;
 
 procedure UpdateBorderCoords(AX, AY: Double);
 begin
-  if ImageCoords.Left > ScreenToWorldX(round(AX)) then
-    ImageCoords.Left := ScreenToWorldX(round(AX));
-  if ImageCoords.Top > ScreenToWorldY(round(AY)) then
-    ImageCoords.Top := ScreenToWorldY(round(AY));
-  if ImageCoords.Right < ScreenToWorldX(round(AX)) then
-    ImageCoords.Right := ScreenToWorldX(round(AX));
-  if ImageCoords.Bottom < ScreenToWorldY(round(AY)) then
-    ImageCoords.Bottom := ScreenToWorldY(round(AY));
+  if ImageCoords.Left > AX then
+    ImageCoords.Left := AX;
+  if ImageCoords.Top > AY then
+    ImageCoords.Top := AY;
+  if ImageCoords.Right < AX then
+    ImageCoords.Right := AX;
+  if ImageCoords.Bottom < AY then
+    ImageCoords.Bottom := AY;
 end;
 
 procedure UpdateCanvasCoords(ARect: TDoubleRect);

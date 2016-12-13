@@ -322,17 +322,17 @@ procedure THandTool.MouseMove(X, Y: integer);
 var
   i, j: Integer;
   Selected: Boolean;
-  mem: TDoublePoint;
+  NewWorldCoords: TDoublePoint;
 begin
-  Selected:=False;
-  mem := (ScreenToWorld(X, Y) - FCurrentPoint);
+  Selected := False;
+  NewWorldCoords := (ScreenToWorld(X, Y) - FCurrentPoint);
   for i := Low(Figures) to High(Figures) do
     if Figures[i].Selected then
       Selected:=True;
   if Selected then
   for i := Low(Figures) to High(Figures) do
     if Figures[i].Selected then
-      Figures[i].Move(mem);
+      Figures[i].Move(NewWorldCoords);
   if not Selected then
     ChangeScreenCoords(
       FCurrentPoint.X - ScreenToWorldX(X),
@@ -363,7 +363,14 @@ end;
 
 procedure TPolyLineTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  UnselectAll;
   Figure := TPolyline.Create(APenColor, FLineStyle, FLineWidth);
+  with Figure.Bounds do begin
+    Top := ScreenToWorld(X, Y).Y;
+    Left := ScreenToWorld(X, Y).X;
+    Bottom := ScreenToWorld(X, Y).Y;
+    Right := ScreenToWorld(X, Y).X;
+  end;
   (Figure as TPolyline).AddPoint(X, Y);
 end;
 

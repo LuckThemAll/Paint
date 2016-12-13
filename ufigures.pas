@@ -13,7 +13,8 @@ Type
     PenStyle: TFPPenStyle;
     Width: Integer;
     Selected: Boolean;
-    function GetBounds: TDoubleRect; virtual; abstract;
+    Bounds : TDoubleRect;
+    function GetBounds: TDoubleRect; virtual;
     procedure Draw(Canvas: TCanvas); virtual; abstract;
     procedure Move(ADoublePoint: TDoublePoint); virtual; abstract;
     function IsPointInside(ABounds: TDoubleRect): Boolean; virtual; abstract;
@@ -131,6 +132,16 @@ begin
   Result := (V1 * V2 < 0) and (V3 * V4 < 0);
 end;
 
+function TFigure.GetBounds: TDoubleRect;
+begin
+  with Result do begin
+    Top := Min(Bounds.Top, Bounds.Bottom);
+    Left := Min(Bounds.Left, Bounds.Right);
+    Bottom := Max(Bounds.Top, Bounds.Bottom);
+    Right := Max(Bounds.Left, Bounds.Right);
+  end;
+end;
+
   { PolyLine }
 
 constructor TPolyLine.Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
@@ -141,10 +152,21 @@ begin
 end;
 
 procedure TPolyLine.AddPoint(X, Y: Integer);
+var
+  WorldX, WorldY: Double;
 begin
+  WorldX:= ScreenToWorld(X, Y).X;
+  WorldY:= ScreenToWorld(X, Y).Y;
   SetLength(Points, Length(Points) + 1);
   Points[High(Points)] := ScreenToWorld(X,Y);
-  UScale.UpdateBorderCoords(X, Y);
+  If WorldX < Bounds.Left then
+    Bounds.Left := WorldX;
+  If WorldY < Bounds.Top then
+    Bounds.Top := WorldY;
+  If WorldX > bounds.Right then
+    Bounds.Right := WorldX;
+  If WorldY > Bounds.Bottom then
+    Bounds.Bottom := WorldY;
 end;
 
 procedure TPolyLine.Draw(Canvas: TCanvas);
@@ -200,21 +222,14 @@ procedure TPolyLine.Move(ADoublePoint: TDoublePoint);
 var
   i: integer;
 begin
-  for i := Low(Points) to High(Points) do
+  for i := Low(Points) to High(Points) do begin
     Points[i] += ADoublePoint;
-end;
-
-function TPolyLine.GetBounds: TDoubleRect;
-var
-  i: integer;
-begin
-  for i := 0 to High(Points) do
-    with Points[i], Result do
-    begin
-      Left := min(X, Left);
-      Right := max(X, Right);
-      Top := min(Y, Top);
-      Bottom := max(Y, Bottom);
+  end;
+  with Bounds do begin
+      Top += ADoublePoint.Y;
+      Left += ADoublePoint.X;
+      Bottom += ADoublePoint.Y;
+      Right += ADoublePoint.X;
     end;
 end;
 
