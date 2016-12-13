@@ -152,6 +152,7 @@ type
   TSelectTool = class(TTool)
     FFirstPoint, FSecondPoint: TDoublePoint;
     constructor Create;
+    function Equal(ADp: TDoublePoint; BDp: TDoublePoint):Boolean;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
     procedure MouseMove(X, Y: integer); override;
@@ -714,6 +715,18 @@ begin
 end;
 
 procedure TSelectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
+
+function isFigureSelected(k: integer):Boolean;
+begin
+  Result := Figures[k].IsIntersect(DoubleRect(FFirstPoint, FSecondPoint)) or
+            Figures[k].IsPointInside(DoubleRect(FFirstPoint, FSecondPoint))
+end;
+
+procedure SelectFigure(k: integer);
+begin
+  Figures[k].Selected := not Figures[k].Selected;
+end;
+
 var
   i: integer;
 begin
@@ -721,11 +734,17 @@ begin
   FSecondPoint := ScreenToWorld(X, Y);
   if not (ssCtrl in Shift) then
     UnselectAll;
-  for i := High(Figures) downto Low(Figures) do begin
-    if Figures[i].IsIntersect(DoubleRect(FFirstPoint, FSecondPoint)) or
-       Figures[i].IsPointInside(DoubleRect(FFirstPoint, FSecondPoint)) then
-         Figures[i].Selected := not Figures[i].Selected;
-  end;
+  if Equal(FFirstPoint, FSecondPoint) then begin
+  for i := High(Figures) downto Low(Figures) do
+    if isFigureSelected(i) then begin
+         SelectFigure(i);
+         Break;
+       end;
+  end
+  else
+    for i := High(Figures) downto Low(Figures) do
+      if isFigureSelected(i) then
+           SelectFigure(i);
   Figure := nil;
 end;
 
@@ -734,6 +753,10 @@ begin
   ParametersAvailable := False;
 end;
 
+function TSelectTool.Equal(ADp: TDoublePoint; BDp: TDoublePoint):Boolean;
+begin
+  Result := (ADp.X = BDp.X) and (ADp.Y = BDp.Y);
+end;
 
 initialization
   RegisterTool(THandTool.Create);
