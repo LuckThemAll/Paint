@@ -175,9 +175,7 @@ begin
   Canvas.Pen.Width   := Width;
   Canvas.Pen.Style   := PenStyle;
   if Selected then begin
-    Canvas.Pen.Color   := clBlue;
-    Canvas.Pen.Width   := Width + 3;
-    Canvas.Pen.Style   := psDashDotDot;
+    Canvas.Pen.Color   := clAqua;
   end;
   Canvas.Polyline(WorldPointsToScreen(Points));
 end;
@@ -250,9 +248,9 @@ end;
 
 procedure TTwoPointsFigure.SetParamsForSelectedFigrs(ACanvas: TCanvas);
 begin
-  ACanvas.Pen.Color   := clBlue;
+  ACanvas.Pen.Color   := clAqua;
   ACanvas.Brush.Style := bsDiagCross;
-  ACanvas.Brush.Color := clBlue;
+  ACanvas.Brush.Color := clAqua;
 end;
 
 function TTwoPointsFigure.IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;

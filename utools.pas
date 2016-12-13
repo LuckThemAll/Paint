@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, UFigures, Graphics, UScale, math, ExtCtrls, Spin, StdCtrls,
-   FPCanvas, Controls, UParameters;
+   FPCanvas, Controls, UParameterEditors;
 type
 
   TTool = class
