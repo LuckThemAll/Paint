@@ -84,8 +84,6 @@ const
 var
   MainScreen: TMainScreen;
   WasMouseDown, MouseOnPaintBox: Boolean;
-  //Figures: array of TFigure;
-  CurrentTool: TTool;
   Colors: array [0..34] of array [0..7] of integer;
   ToolParameters: TPanel;
   PenColor, BrushColor: TColor;

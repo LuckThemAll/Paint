@@ -147,8 +147,8 @@ end;
 constructor TPolyLine.Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
 begin
   PenColor := APenColor;
-  Width := AWidth;
-  PenStyle := APenStyle;
+  FLineWidth := AWidth;
+  FLineStyle := APenStyle;
 end;
 
 procedure TPolyLine.AddPoint(X, Y: Integer);
@@ -172,8 +172,8 @@ end;
 procedure TPolyLine.Draw(Canvas: TCanvas);
 begin
   Canvas.Pen.Color   := PenColor;
-  Canvas.Pen.Width   := Width;
-  Canvas.Pen.Style   := PenStyle;
+  Canvas.Pen.Width   := FLineWidth;
+  Canvas.Pen.Style   := FLineStyle;
   if Selected then begin
     Canvas.Pen.Color   := clAqua;
   end;
@@ -192,7 +192,7 @@ begin
   B := WorldToScreen(ABounds);
   for i := Low(A) to High(A) do begin
     DistanceMouseToPoint := round(sqrt((A[i].X - B.Left)**2 + (A[i].Y - B.Top)**2));
-    if DistanceMouseToPoint <= ((Width div 2) + 1) then begin
+    if DistanceMouseToPoint <= ((FLineWidth div 2) + 1) then begin
       Result := true;
       Break;
     end;
@@ -279,20 +279,20 @@ end;
 constructor TRectangle.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
   AWidth: integer; ABrushStyle: TFPBrushStyle);
 begin
-  PenColor := APenColor;
-  Width := AWidth;
-  PenStyle := APenStyle;
-  BrushColor:=ABrushColor;
-  BrushStyle:=ABrushStyle;
+  PenColor    := APenColor;
+  FLineWidth  := AWidth;
+  FLineStyle  := APenStyle;
+  FBrushColor :=ABrushColor;
+  FBrushStyle :=ABrushStyle;
 end;
 
 procedure TRectangle.Draw(Canvas: TCanvas);
 begin
   Canvas.Pen.Color   := PenColor;
-  Canvas.Brush.Color := BrushColor;
-  Canvas.Pen.Width   := Width;
-  Canvas.Brush.Style := BrushStyle;
-  Canvas.Pen.Style   := PenStyle;
+  Canvas.Brush.Color := FBrushColor;
+  Canvas.Pen.Width   := FLineWidth;
+  Canvas.Brush.Style := FBrushStyle;
+  Canvas.Pen.Style   := FLineStyle;
   if Selected then
     SetParamsForSelectedFigrs(Canvas);
   Canvas.Rectangle(WorldToScreen(Bounds));
@@ -327,22 +327,22 @@ end;
 constructor TRoundRect.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
    AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
 begin
-  PenColor   := APenColor;
-  Width      := AWidth;
-  PenStyle   := APenStyle;
-  BrushColor := ABrushColor;
-  BrushStyle := ABrushStyle;
-  RadiusX    := ARadiusX;
-  RadiusY    := ARadiusY;
+  PenColor    := APenColor;
+  FLineWidth  := AWidth;
+  FLineStyle  := APenStyle;
+  FBrushColor := ABrushColor;
+  FBrushStyle := ABrushStyle;
+  RadiusX     := ARadiusX;
+  RadiusY     := ARadiusY;
 end;
 
 procedure TRoundRect.Draw(Canvas: TCanvas);
 begin
   Canvas.Pen.Color   := PenColor;
-  Canvas.Brush.Color := BrushColor;
-  Canvas.Pen.Width   := Width;
-  Canvas.Brush.Style := BrushStyle;
-  Canvas.Pen.Style   := PenStyle;
+  Canvas.Brush.Color := FBrushColor;
+  Canvas.Pen.Width   := FLineWidth;
+  Canvas.Brush.Style := FBrushStyle;
+  Canvas.Pen.Style   := FLineStyle;
   if Selected then
     SetParamsForSelectedFigrs(Canvas);
   Canvas.RoundRect(WorldToScreen(Bounds), RadiusX, RadiusY);
@@ -379,19 +379,19 @@ constructor TEllipse.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenSty
   AWidth: integer; ABrushStyle: TFPBrushStyle);
 begin
   PenColor   := APenColor;
-  Width      := AWidth;
-  PenStyle   := APenStyle;
-  BrushColor := ABrushColor;
-  BrushStyle := ABrushStyle;
+  FLineWidth     := AWidth;
+  FLineStyle   := APenStyle;
+  FBrushColor := ABrushColor;
+  FBrushStyle := ABrushStyle;
 end;
 
 procedure TEllipse.Draw(Canvas: TCanvas);
 begin
   Canvas.Pen.Color   := PenColor;
-  Canvas.Brush.Color := BrushColor;
-  Canvas.Pen.Width   := Width;
-  Canvas.Brush.Style := BrushStyle;
-  Canvas.Pen.Style   := PenStyle;
+  Canvas.Brush.Color := FBrushColor;
+  Canvas.Pen.Width   := FLineWidth;
+  Canvas.Brush.Style := FBrushStyle;
+  Canvas.Pen.Style   := FLineStyle;
   if Selected then
     SetParamsForSelectedFigrs(Canvas);
   Canvas.Ellipse(WorldToScreen(Bounds));
@@ -426,15 +426,15 @@ end;
 constructor TLine.Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
 begin
   PenColor := APenColor;
-  Width := AWidth;
-  PenStyle := APenStyle;
+  FLineWidth := AWidth;
+  FLineStyle := APenStyle;
 end;
 
 procedure TLine.Draw(Canvas: TCanvas);
 begin
   Canvas.Pen.Color   := PenColor;
-  Canvas.Pen.Width   := Width;
-  Canvas.Pen.Style   := PenStyle;
+  Canvas.Pen.Width   := FLineWidth;
+  Canvas.Pen.Style   := FLineStyle;
   if Selected then
     SetParamsForSelectedFigrs(Canvas);
   Canvas.Line(WorldToScreen(Bounds));
@@ -477,10 +477,10 @@ constructor TPolygon.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenSty
   AWidth: integer; ABrushStyle: TFPBrushStyle; ANumberOfAngles: Integer);
 begin
   PenColor       := APenColor;
-  Width          := AWidth;
-  PenStyle       := APenStyle;
-  BrushStyle     := ABrushStyle;
-  BrushColor     := ABrushColor;
+  FLineWidth          := AWidth;
+  FLineStyle       := APenStyle;
+  FBrushStyle     := ABrushStyle;
+  FBrushColor     := ABrushColor;
   NumberOfAngles := ANumberOfAngles;
 end;
 
@@ -491,10 +491,10 @@ var
   MidlCoord: TDoublePoint;
 begin
   Canvas.Pen.Color   := PenColor;
-  Canvas.Brush.Color := BrushColor;
-  Canvas.Pen.Width   := Width;
-  Canvas.Brush.Style := BrushStyle;
-  Canvas.Pen.Style   := PenStyle;
+  Canvas.Brush.Color := FBrushColor;
+  Canvas.Pen.Width   := FLineWidth;
+  Canvas.Brush.Style := FBrushStyle;
+  Canvas.Pen.Style   := FLineStyle;
   if Selected then begin
     SetParamsForSelectedFigrs(Canvas);
   end;

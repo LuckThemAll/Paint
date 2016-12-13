@@ -6,16 +6,72 @@ interface
 
 uses
   Classes, SysUtils, UFigures, Graphics, UScale, math, ExtCtrls, Spin, StdCtrls,
-   FPCanvas, Controls, UParameterEditors;
+   FPCanvas, Controls;
 type
+
+  TFigureClass = class of TFigure;
+  TCodeArray = array of Integer;
+
+  { TParameters }
+
+  TParameterEditor = class
+      FLabel: TLabel;
+      FComponent: TControl;
+      constructor Create; virtual; abstract;
+    end;
+
+  ArrayOfParameters = array of TParameterEditor;
+
+  TLineWidthParameter = class(TParameterEditor)
+    constructor Create; override;
+    procedure onLineWidthChange(Sender: TObject);
+  end;
+
+  TLineStyleParameter = class(TParameterEditor)
+    constructor Create; override;
+    procedure onLineStyleChange(Sender: TObject);
+    procedure OnDrawLineStyleItem(Control: TWinControl;
+      Index: Integer; ARect: TRect; State: TOwnerDrawState);
+  end;
+
+  TBrushStyleParameter = class(TParameterEditor)
+    constructor Create; override;
+    procedure onBrushStyleChange(Sender: TObject);
+    procedure OnDrawBrushStyleItem(Control: TWinControl;
+      Index: Integer; ARect: TRect; State: TOwnerDrawState);
+  end;
+
+  TNumberOfAnglesParameter = class(TParameterEditor)
+    constructor Create; override;
+    procedure onNumOfAnglesChange(Sender: TObject);
+  end;
+
+  TZoomParameter = class(TParameterEditor)
+    constructor Create; override;
+    procedure onZoomChange(Sender: TObject);
+  end;
+
+  TRadiusXRoundRectParameter = class(TParameterEditor)
+    constructor Create; override;
+    procedure onRadiusXChange(Sender: TObject);
+  end;
+
+  TRadiusYRoundRectParameter = class(TParameterEditor)
+    constructor Create; override;
+    procedure onRadiusYChange(Sender: TObject);
+  end;
+
+  { TTools }
 
   TTool = class
     FIcon: String;
     Figure: TFigure;
     FPanel: TPanel;
+    FigureClass: TFigureClass;
     ParametersAvailable: Boolean;
+    ParameterEditors: ArrayOfParameters;
     function GetFigure: TFigure;
-    procedure AddParameter(AParameter: TParameter);
+    procedure AddParameter(AParameter: TParameterEditor);
     procedure Init(APanel: TPanel);
     procedure InitParameters; virtual; abstract;
     procedure ShowParameters;
@@ -49,27 +105,18 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
-    procedure ChangeZoomParameter(Sender: TObject);
   end;
 
-  TPolyLineTool = class(TTool)
+  TLinesTool = class(TTool)
     FLineWidth: integer;
     FLineStyle: TFPPenStyle;
-    constructor Create;
-    procedure MouseDown(X, Y: integer;
-      APenColor, ABrushColor: TColor);  override;
-    procedure MouseMove(X, Y: integer); override;
-    procedure MouseUp(X, Y: integer;
-      AWidth, AHeight: Integer; Shift: TShiftState);        override;
-    procedure InitParameters;           override;
-    procedure ChangeLineWidth(Sender: TObject);
-    procedure ChangeLineStyle(Sender: TObject);
   end;
 
-  TRectangleTool = class(TTool)
-    FLineWidth: integer;
-    FLineStyle: TFPPenStyle;
+  TFilledTool = class(TLinesTool)
     FBrushStyle: TFPBrushStyle;
+  end;
+
+  TPolyLineTool = class(TLinesTool)
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -77,15 +124,9 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
-    procedure ChangeLineWidth(Sender: TObject);
-    procedure ChangeLineStyle(Sender: TObject);
-    procedure ChangeBrushStyle(Sender: TObject);
   end;
 
-  TPolygonTool = class(TTool)
-    FLineWidth, FNumberOfAngles: Integer;
-    FLineStyle: TFPPenStyle;
-    FBrushStyle: TFPBrushStyle;
+  TRectangleTool = class(TFilledTool)
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -93,16 +134,10 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
-    procedure ChangeLineWidth(Sender: TObject);
-    procedure ChangeLineStyle(Sender: TObject);
-    procedure ChangeBrushStyle(Sender: TObject);
-    procedure ChangeNumberOfAngles(sender: TObject);
   end;
 
-  TEllipseTool = class(TTool)
-    FLineWidth: integer;
-    FLineStyle: TFPPenStyle;
-    FBrushStyle: TFPBrushStyle;
+  TPolygonTool = class(TFilledTool)
+    FNumberOfAngles: Integer;
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -110,14 +145,9 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
-    procedure ChangeLineWidth(Sender: TObject);
-    procedure ChangeLineStyle(Sender: TObject);
-    procedure ChangeBrushStyle(Sender: TObject);
   end;
 
-  TLineTool = class(TTool)
-    FLineWidth: integer;
-    FLineStyle: TFPPenStyle;
+  TEllipseTool = class(TFilledTool)
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -125,15 +155,20 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
-    procedure ChangeLineWidth(Sender: TObject);
-    procedure ChangeLineStyle(Sender: TObject);
+  end;
+
+  TLineTool = class(TLinesTool)
+    constructor Create;
+    procedure MouseDown(X, Y: integer;
+      APenColor, ABrushColor: TColor);  override;
+    procedure MouseMove(X, Y: integer); override;
+    procedure MouseUp(X, Y: integer;
+      AWidth, AHeight: Integer; Shift: TShiftState);        override;
+    procedure InitParameters;           override;
   end;
 
 
-  TRoundRectTool = class(TTool)
-    FLineWidth: integer;
-    FLineStyle: TFPPenStyle;
-    FBrushStyle: TFPBrushStyle;
+  TRoundRectTool = class(TFilledTool)
     RadiusX, RadiusY: integer;
     constructor Create;
     procedure MouseDown(X, Y: integer;
@@ -142,11 +177,6 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
-    procedure ChangeLineWidth(Sender: TObject);
-    procedure ChangeLineStyle(Sender: TObject);
-    procedure ChangeBrushStyle(Sender: TObject);
-    procedure ChangeRadiusX(Sender: TObject);
-    procedure ChangeRadiusY(Sender: TObject);
   end;
 
   TSelectTool = class(TTool)
@@ -159,43 +189,256 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
+    function CrossParameters: ArrayOfParameters;
   end;
 
 
 var
   ToolRegistry: array of TTool;
+  CurrentTool: TTool;
 
 implementation
+
+  { TLineWidthParameter }
+
+constructor TLineWidthParameter.Create;
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Толщина линии';
+  FComponent := TSpinEdit.Create(nil);
+  with FComponent as TSpinEdit do begin
+    MaxValue := 500;
+    MinValue := 1;
+    Value := 1;
+    Width := 60;
+    Left:= 0;
+    OnChange := @onLineWidthChange;
+  end;
+end;
+
+procedure TLineWidthParameter.onLineWidthChange(Sender: TObject);
+begin
+  (CurrentTool as TLinesTool).FLineWidth := (Sender as TSpinEdit).Value
+end;
+
+  { TLineStyleParameter }
+
+constructor TLineStyleParameter.Create;
 var
-  Parameters: array of TParameter;
+  i: integer;
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Стиль линии';
+  FComponent := TComboBox.Create(nil);
+  with FComponent as TComboBox do begin
+    AutoComplete := False;
+    Width := 97;
+    for i := 0 to 4 do Items.Add('');
+    Style := csOwnerDrawFixed;
+    ItemIndex := 0;
+    Left:= 0;
+    Font.Bold := True;
+    Font.Size := 12;
+    OnChange := @onLineStyleChange;
+    OnDrawItem := @OnDrawLineStyleItem;
+    ReadOnly := true;
+  end;
+end;
+
+procedure TLineStyleParameter.OnDrawLineStyleItem(Control: TWinControl;
+  Index: Integer; ARect: TRect; State: TOwnerDrawState);
+begin
+  with (Control as TComboBox).Canvas, ARect do begin
+    Brush.Style := bsSolid;
+    Brush.Color := clWhite;
+    Pen.Style := psClear;
+    Pen.Color := clWhite;
+    Top += 3;
+    Left += 3;
+    Right -= 3;
+    Bottom -= 3;
+    Rectangle(ARect);
+    Pen.Style := TFPPenStyle(Index);
+    Pen.Width := 3;
+    Pen.Color := clBlack;
+    Top += 6;
+    Bottom := ARect.Top;
+    Line(ARect);
+  end;
+end;
+
+procedure TLineStyleParameter.onLineStyleChange(Sender: TObject);
+begin
+  (CurrentTool as TLinesTool).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex)
+end;
+
+  { TBrushStyleParameter }
+
+constructor TBrushStyleParameter.Create;
+var
+  i: integer;
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Стиль заливки';
+  FComponent := TComboBox.Create(nil);
+  with FComponent as TComboBox do begin
+    Width := 97;
+    for i := 0 to 7 do Items.Add('');
+    Font.Size := 10;
+    ItemIndex := 0;
+    ReadOnly := true;
+    Style := csOwnerDrawFixed;
+    OnChange := @onBrushStyleChange;
+    OnDrawItem := @OnDrawBrushStyleItem;
+  end;
+end;
+
+procedure TBrushStyleParameter.OnDrawBrushStyleItem(
+  Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState);
+begin
+  with (Control as TComboBox).Canvas, ARect do begin
+    Brush.Style := bsSolid;
+    Brush.Color := clWhite;
+    Top += 2;
+    Left += 2;
+    Right -= 2;
+    Bottom -= 2;
+    Rectangle(ARect);
+    if TFPBrushStyle(Index) = bsClear then begin
+      Brush.Color := clWhite;
+      Brush.Style := bsSolid;
+    end
+    else begin
+      Brush.Style := TFPBrushStyle(Index);
+      Brush.Color := clBlack;
+    end;
+    Pen.Color := clBlack;
+    Rectangle(ARect);
+  end;
+end;
+
+procedure TBrushStyleParameter.onBrushStyleChange(Sender: TObject);
+var
+  i: Integer;
+begin
+  (CurrentTool as TFilledTool).FBrushStyle := TFPBrushStyle((Sender as TComboBox).ItemIndex)
+end;
+
+  { TNumberOfAnglesParameter }
+
+constructor TNumberOfAnglesParameter.Create;
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Количество углов';
+  FComponent := TSpinEdit.Create(nil);
+  with FComponent as TSpinEdit do begin
+    MaxValue := 15;
+    MinValue := 3;
+    Value := 3;
+    Width := 60;
+    OnChange := @onNumOfAnglesChange;
+  end;
+end;
+
+procedure TNumberOfAnglesParameter.onNumOfAnglesChange(Sender: TObject);
+begin
+  (CurrentTool as TPolygonTool).FNumberOfAngles := (Sender as TSpinEdit).Value
+end;
+
+  { TRadiusXRoundRectParameter }
+
+constructor TRadiusXRoundRectParameter.Create;
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Radius X';
+  FComponent := TSpinEdit.Create(nil);
+  with FComponent as TSpinEdit do begin
+    MaxValue := 100;
+    MinValue := 0;
+    Value := 10;
+    Width := 60;
+    OnChange := @onRadiusXChange;
+  end;
+end;
+
+procedure TRadiusXRoundRectParameter.onRadiusXChange(Sender: TObject);
+begin
+  (CurrentTool as TRoundRectTool).RadiusX := (Sender as TSpinEdit).Value
+end;
+
+  { TRadiusYRoundRectParameter }
+
+constructor TRadiusYRoundRectParameter.Create;
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Radius Y';
+  FComponent := TSpinEdit.Create(nil);
+  with FComponent as TSpinEdit do begin
+    MaxValue := 100;
+    MinValue := 0;
+    Value := 10;
+    Width := 60;
+    OnChange := @onRadiusYChange;
+  end;
+end;
+
+procedure TRadiusYRoundRectParameter.onRadiusYChange(Sender: TObject);
+begin
+  (CurrentTool as TRoundRectTool).RadiusY := (Sender as TSpinEdit).Value
+end;
+
+  { TZoomParameter }
+
+constructor TZoomParameter.Create;
+begin
+  FLabel := TLabel.Create(Nil);
+  FLabel.Caption := 'Вид лупы';
+  FComponent := TComboBox.Create(nil);
+  with FComponent as TComboBox do begin
+    Items.Add('Увеличить');
+    Items.Add('Уменьшить');
+    Items.Add('Приблизить область');
+    AutoComplete := False;
+    ItemIndex := 0;
+    Width := 97;
+    Left:= 0;
+    OnChange := @onZoomChange;
+    ReadOnly := true;
+  end;
+end;
+
+procedure TZoomParameter.onZoomChange(Sender: TObject);
+begin
+    (CurrentTool as TZoomTool).ZoomParameter := (Sender as TComboBox).Text;
+end;
 
   { TTool }
 
-procedure RegisterTool(Tool: TTool);
+procedure RegisterTool(Tool: TTool; AFigureClass: TFigureClass);
 begin
   SetLength(ToolRegistry, Length(ToolRegistry) + 1);
   ToolRegistry[High(ToolRegistry)] := Tool;
 end;
 
-procedure TTool.AddParameter(AParameter: TParameter);
+procedure TTool.AddParameter(AParameter: TParameterEditor);
 begin
-  SetLength(Parameters, Length(Parameters) + 1);
-  Parameters[High(Parameters)] := AParameter;
+  SetLength(ParameterEditors, Length(ParameterEditors) + 1);
+  ParameterEditors[High(ParameterEditors)] := AParameter;
 end;
 
 procedure TTool.Init(APanel: TPanel);
 var
   i: Integer;
 begin
-  Parameters := nil;
+  ParameterEditors := nil;
   FPanel := APanel;
   InitParameters;
   ShowParameters;
-  for i := Low(Parameters) to High(Parameters) do begin
+  for i := Low(ParameterEditors) to High(ParameterEditors) do begin
     FPanel.Height :=(
       FPanel.Height +
-      Parameters[i].FLabel.Height +
-      Parameters[i].FComponent.Height);
+      ParameterEditors[i].FLabel.Height +
+      ParameterEditors[i].FComponent.Height);
   end;
 end;
 
@@ -203,8 +446,8 @@ procedure TTool.ShowParameters;
 var
   i: integer;
 begin
-  for i := 0 to High(Parameters) do begin
-    with Parameters[i] do begin
+  for i := 0 to High(ParameterEditors) do begin
+    with ParameterEditors[i] do begin
       FLabel.Top        := i * 47;
       FLabel.Left       := 2;
       FLabel.Parent     := FPanel;
@@ -305,14 +548,7 @@ end;
 procedure TZoomTool.InitParameters;
 begin
   ParametersAvailable := true;
-  AddParameter(TZoomParameter.Create(@ChangeZoomParameter));
-end;
-
-procedure TZoomTool.ChangeZoomParameter(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    ZoomParameter := Text;
-  end;
+  AddParameter(TZoomParameter.Create);
 end;
 
   { THandTool }
@@ -395,21 +631,8 @@ end;
 procedure TPolylineTool.InitParameters;
 begin
   ParametersAvailable := True;
-  AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
-  AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
-end;
-
-procedure TPolyLineTool.ChangeLineWidth(Sender: TObject);
-begin
-  FLineWidth := (Sender as TSpinEdit).Value;
-end;
-
-
-procedure TPolyLineTool.ChangeLineStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FLineStyle := TFPPenStyle(ItemIndex);
-  end;
+  AddParameter(TLineWidthParameter.Create);
+  AddParameter(TLineStyleParameter.Create);
 end;
 
   { TRectangleTool }
@@ -440,29 +663,9 @@ end;
 procedure TRectangleTool.InitParameters;
 begin
   ParametersAvailable := True;
-  AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
-  AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
-  AddParameter(TBrushStyleParameter.Create(@ChangeBrushStyle));
-end;
-
-procedure TRectangleTool.ChangeLineWidth(Sender: TObject);
-begin
-  FLineWidth := (Sender as TSpinEdit).Value;
-end;
-
-
-procedure TRectangleTool.ChangeLineStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FLineStyle := TFPPenStyle(ItemIndex);
-  end;
-end;
-
-procedure TRectangleTool.ChangeBrushStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FBrushStyle := TFPBrushStyle(ItemIndex);
-  end;
+  AddParameter(TLineWidthParameter.Create);
+  AddParameter(TLineStyleParameter.Create);
+  AddParameter(TBrushStyleParameter.Create);
 end;
 
   { TPolygonTool }
@@ -495,35 +698,10 @@ end;
 procedure TPolygonTool.InitParameters;
 begin
   ParametersAvailable := True;
-  AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
-  AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
-  AddParameter(TBrushStyleParameter.Create(@ChangeBrushStyle));
-  AddParameter(TNumberOfAnglesParameter.Create(@ChangeNumberOfAngles));
-end;
-
-procedure TPolygonTool.ChangeLineWidth(Sender: TObject);
-begin
-  FLineWidth := (Sender as TSpinEdit).Value;
-end;
-
-
-procedure TPolygonTool.ChangeLineStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FLineStyle := TFPPenStyle(ItemIndex);
-  end;
-end;
-
-procedure TPolygonTool.ChangeBrushStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FBrushStyle := TFPBrushStyle(ItemIndex);
-  end;
-end;
-
-procedure TPolygonTool.ChangeNumberOfAngles(Sender: TObject);
-begin
-  FNumberOfAngles := (Sender as TSpinEdit).Value;
+  AddParameter(TLineWidthParameter.Create);
+  AddParameter(TLineStyleParameter.Create);
+  AddParameter(TBrushStyleParameter.Create);
+  AddParameter(TNumberOfAnglesParameter.Create);
 end;
 
   { TEllipseTool }
@@ -554,29 +732,9 @@ end;
 procedure TEllipseTool.InitParameters;
 begin
   ParametersAvailable := True;
-  AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
-  AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
-  AddParameter(TBrushStyleParameter.Create(@ChangeBrushStyle));
-end;
-
-procedure TEllipseTool.ChangeLineWidth(Sender: TObject);
-begin
-  FLineWidth := (Sender as TSpinEdit).Value;
-end;
-
-
-procedure TEllipseTool.ChangeLineStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FLineStyle := TFPPenStyle(ItemIndex);
-  end;
-end;
-
-procedure TEllipseTool.ChangeBrushStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FBrushStyle := TFPBrushStyle(ItemIndex);
-  end;
+  AddParameter(TLineWidthParameter.Create);
+  AddParameter(TLineStyleParameter.Create);
+  AddParameter(TBrushStyleParameter.Create);
 end;
 
   { TLineTool }
@@ -607,20 +765,8 @@ end;
 procedure TLineTool.InitParameters;
 begin
   ParametersAvailable := True;
-  AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
-  AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
-end;
-
-procedure TLineTool.ChangeLineWidth(Sender: TObject);
-begin
-  FLineWidth := (Sender as TSpinEdit).Value;
-end;
-
-procedure TLineTool.ChangeLineStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FLineStyle := TFPPenStyle(ItemIndex);
-  end;
+  AddParameter(TLineWidthParameter.Create);
+  AddParameter(TLineStyleParameter.Create);
 end;
 
 { TRounRectTool }
@@ -629,6 +775,8 @@ constructor TRoundRectTool.Create;
 begin
   Inherited;
   FIcon := 'imgs/RoundRect.bmp';
+  RadiusX := 10;
+  RadiusY := 10;
 end;
 
 procedure TRoundRectTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
@@ -652,45 +800,11 @@ end;
 procedure TRoundRectTool.InitParameters;
 begin
   ParametersAvailable := True;
-  AddParameter(TBorderWidthParameter.Create(@ChangeLineWidth));
-  AddParameter(TBorderStyleParameter.Create(@ChangeLineStyle));
-  AddParameter(TBrushStyleParameter.Create(@ChangeBrushStyle));
-  AddParameter(TRadiusXRoundRectParameter.Create(@ChangeRadiusX));
-  AddParameter(TRadiusYRoundRectParameter.Create(@ChangeRadiusY));
-end;
-
-procedure TRoundRectTool.ChangeLineWidth(Sender: TObject);
-begin
-  FLineWidth := (Sender as TSpinEdit).Value;
-end;
-
-
-procedure TRoundRectTool.ChangeLineStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FLineStyle := TFPPenStyle(ItemIndex);
-  end;
-end;
-
-procedure TRoundRectTool.ChangeBrushStyle(Sender: TObject);
-begin
-  with Sender as TComboBox do begin
-    FBrushStyle := TFPBrushStyle(ItemIndex);
-  end;
-end;
-
-procedure TRoundRectTool.ChangeRadiusX(Sender: TObject);
-begin
-  with Sender as TSpinEdit do begin
-    RadiusX := (Sender as TSpinEdit).Value;
-  end;
-end;
-
-procedure TRoundRectTool.ChangeRadiusY(Sender: TObject);
-begin
-  with Sender as TSpinEdit do begin
-    RadiusY := (Sender as TSpinEdit).Value;
-  end;
+  AddParameter(TLineWidthParameter.Create);
+  AddParameter(TLineStyleParameter.Create);
+  AddParameter(TBrushStyleParameter.Create);
+  AddParameter(TRadiusXRoundRectParameter.Create);
+  AddParameter(TRadiusYRoundRectParameter.Create);
 end;
 
   { TSelectTool }
@@ -750,7 +864,9 @@ end;
 
 procedure TSelectTool.InitParameters;
 begin
-  ParametersAvailable := False;
+  ParametersAvailable := True;
+  AddParameter(TLineWidthParameter.Create);
+  AddParameter(TLineStyleParameter.Create);
 end;
 
 function TSelectTool.Equal(ADp: TDoublePoint; BDp: TDoublePoint):Boolean;
@@ -758,15 +874,27 @@ begin
   Result := (ADp.X = BDp.X) and (ADp.Y = BDp.Y);
 end;
 
+function TSelectTool.CrossParameters: ArrayOfParameters;
+var
+  i, j, h: integer;
+  CommonParameters: ArrayOfParameters;
+begin
+  for i := Low(Figures) to High(Figures) do
+    for j := i to High(Figures) do
+      if Figures[i].Selected then begin
+        AddParameter(TLineWidthParameter.Create);
+      end;
+end;
+
 initialization
-  RegisterTool(THandTool.Create);
-  RegisterTool(TPolyLineTool.Create);
-  RegisterTool(TRectangleTool.Create);
-  RegisterTool(TEllipseTool.Create);
-  RegisterTool(TLineTool.Create);
-  RegisterTool(TPolygonTool.Create);
-  RegisterTool(TRoundRectTool.Create);
-  RegisterTool(TZoomTool.Create);
-  RegisterTool(TSelectTool.Create);
+  RegisterTool(THandTool.Create, Nil);
+  RegisterTool(TPolyLineTool.Create, TPolyLine);
+  RegisterTool(TRectangleTool.Create, TRectangle);
+  RegisterTool(TEllipseTool.Create, TEllipse);
+  RegisterTool(TLineTool.Create, TLine);
+  RegisterTool(TPolygonTool.Create, TPolygon);
+  RegisterTool(TRoundRectTool.Create, TRoundRect);
+  RegisterTool(TZoomTool.Create, Nil);
+  RegisterTool(TSelectTool.Create, Nil);
 end.
 
