@@ -24,7 +24,6 @@ Type
   TPolyLine = class(TFigure)
     Points: array of TDoublePoint;
     constructor Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
-    function GetBounds: TDoubleRect; override;
     procedure AddPoint(X, Y: Integer);
     procedure Draw(Canvas: TCanvas); override;
     procedure Move(ADoublePoint: TDoublePoint); override;
@@ -35,8 +34,6 @@ end;
   { TTwoPointsFigure }
 
   TTwoPointsFigure = class(TFigure)
-    Bounds : TDoubleRect;
-    function GetBounds: TDoubleRect; override;
     procedure AddFirstPoint(X, Y: Integer);
     procedure AddSecondPoint(X, Y: Integer);
     procedure SetParamsForSelectedFigrs(ACanvas: TCanvas);
@@ -241,16 +238,6 @@ begin
   ACanvas.Pen.Color   := clBlue;
   ACanvas.Brush.Style := bsDiagCross;
   ACanvas.Brush.Color := clBlue;
-end;
-
-function TTwoPointsFigure.GetBounds: TDoubleRect;
-begin
-  with Result do begin
-    Top := Min(Bounds.Top, Bounds.Bottom);
-    Left := Min(Bounds.Left, Bounds.Right);
-    Bottom := Max(Bounds.Top, Bounds.Bottom);
-    Right := Max(Bounds.Left, Bounds.Right);
-  end;
 end;
 
 function TTwoPointsFigure.IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;
