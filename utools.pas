@@ -19,6 +19,7 @@ type
     procedure Init(APanel: TPanel);
     procedure InitParameters; virtual; abstract;
     procedure ShowParameters;
+    procedure UnselectAll;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  virtual; abstract;
     procedure MouseMove(X, Y: integer); virtual; abstract;
@@ -218,6 +219,14 @@ begin
   Result := Figure;
 end;
 
+procedure TTool.UnselectAll;
+var
+  i: integer;
+begin
+  for i := High(Figures) downto Low(Figures) do
+      Figures[i].Selected := false;
+end;
+
   { TZoomTool }
 
 constructor TZoomTool.Create;
@@ -343,9 +352,7 @@ end;
 
 procedure THandTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer; Shift: TShiftState);
 begin
-  {ChangeScreenCoords(
-    FCurrentPoint.X - ScreenToWorldX(X),
-    FCurrentPoint.Y - ScreenToWorldY(Y));}
+  //Nothing
 end;
 
 procedure THandTool.InitParameters;
@@ -414,6 +421,7 @@ end;
 
 procedure TRectangleTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  UnselectAll;
   Figure := TRectangle.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle);
   (Figure as TRectangle).AddFirstPoint(X, Y);
 end;
@@ -467,6 +475,7 @@ end;
 
 procedure TPolygonTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  UnselectAll;
   Figure := TPolygon.Create(APenColor, ABrushColor, FLineStyle, FLineWidth,
     FBrushStyle, FNumberOfAngles);
   (Figure as TPolygon).AddFirstPoint(X, Y);
@@ -526,6 +535,7 @@ end;
 
 procedure TEllipseTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  UnselectAll;
   Figure := TEllipse.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle);
   (Figure as TEllipse).AddFirstPoint(X, Y);
 end;
@@ -578,6 +588,7 @@ end;
 
 procedure TLineTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  UnselectAll;
   Figure := TLine.Create(APenColor, FLineStyle, FLineWidth);
   (Figure as TLine).AddFirstPoint(X, Y);
 end;
@@ -621,6 +632,7 @@ end;
 
 procedure TRoundRectTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  UnselectAll;
   Figure := TRoundRect.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle,
     RadiusX, RadiusY);
   (Figure as TRoundRect).AddFirstPoint(X, Y);
@@ -708,8 +720,7 @@ begin
   (Figure as TFrame).AddSecondPoint(X, Y);
   FSecondPoint := ScreenToWorld(X, Y);
   if not (ssCtrl in Shift) then
-    for i := High(Figures) downto Low(Figures) do
-      Figures[i].Selected := false;
+    UnselectAll;
   for i := High(Figures) downto Low(Figures) do begin
     if Figures[i].IsIntersect(DoubleRect(FFirstPoint, FSecondPoint)) or
        Figures[i].IsPointInside(DoubleRect(FFirstPoint, FSecondPoint)) then
