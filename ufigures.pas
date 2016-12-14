@@ -8,10 +8,9 @@ uses
   Classes, SysUtils, windows, Graphics, UScale, math, FPCanvas;
 
 Type
+
   TFigure = class
     PenColor: TColor;
-    PenStyle: TFPPenStyle;
-    Width: Integer;
     Selected: Boolean;
     Bounds : TDoubleRect;
     function GetBounds: TDoubleRect; virtual;
@@ -22,7 +21,12 @@ Type
     function AreSegmentsIntersect(A1, A2, B1, B2: TDoublePoint): Boolean;
   end;
 
-  TPolyLine = class(TFigure)
+  TLinesFigure = class(TFigure)
+    FLineStyle: TFPPenStyle;
+    FLineWidth: Integer;
+  end;
+
+  TPolyLine = class(TLinesFigure)
     Points: array of TDoublePoint;
     constructor Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
     procedure AddPoint(X, Y: Integer);
@@ -32,9 +36,14 @@ Type
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
 end;
 
+  TFilledFigures = class(TLinesFigure)
+    FBrushColor: TColor;
+    FBrushStyle: TFPBrushStyle;
+  end;
+
   { TTwoPointsFigure }
 
-  TTwoPointsFigure = class(TFigure)
+  TTwoPointsFigure = class(TFilledFigures)
     procedure AddFirstPoint(X, Y: Integer);
     procedure AddSecondPoint(X, Y: Integer);
     procedure SetParamsForSelectedFigrs(ACanvas: TCanvas);
@@ -44,8 +53,6 @@ end;
   end;
 
   TRectangle = class(TTwoPointsFigure)
-    BrushColor: TColor;
-    BrushStyle: TFPBrushStyle;
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle);
     procedure Draw(Canvas: TCanvas); override;
@@ -54,8 +61,6 @@ end;
   end;
 
   TRoundRect = class(TTwoPointsFigure)
-    BrushColor: TColor;
-    BrushStyle: TFPBrushStyle;
     RadiusX, RadiusY: integer;
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
@@ -65,8 +70,6 @@ end;
   end;
 
   TEllipse = class(TTwoPointsFigure)
-    BrushColor: TColor;
-    BrushStyle: TFPBrushStyle;
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle);
     procedure Draw(Canvas: TCanvas); override;
@@ -87,8 +90,6 @@ end;
 
   TPolygon = class(TTwoPointsFigure)
     NumberOfAngles: integer;
-    BrushColor: TColor;
-    BrushStyle: TFPBrushStyle;
     Angles: array of TDoublePoint;
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle; ANumberOfAngles: Integer);
@@ -101,7 +102,6 @@ procedure SaveActualFigure(Figure: TFigure);
 
 var
   Figures: array of TFigure;
-
 
 implementation
 
