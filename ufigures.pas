@@ -9,13 +9,17 @@ uses
 
 Type
 
+  StrArr = array of String;
+
   TFigure = class
-    PenColor: TColor;
+    FLineColor: TColor;
+    FBrushColor: TColor;
     Selected: Boolean;
     Bounds : TDoubleRect;
     function GetBounds: TDoubleRect; virtual;
     procedure Draw(Canvas: TCanvas); virtual; abstract;
     procedure Move(ADoublePoint: TDoublePoint); virtual; abstract;
+    procedure DrawSelectFrame(ABounds: TDoubleRect; ACanvas: TCanvas); virtual;
     function IsPointInside(ABounds: TDoubleRect): Boolean; virtual; abstract;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   virtual; abstract;
     function AreSegmentsIntersect(A1, A2, B1, B2: TDoublePoint): Boolean;
@@ -46,7 +50,6 @@ end;
   TTwoPointsFigure = class(TFilledFigures)
     procedure AddFirstPoint(X, Y: Integer);
     procedure AddSecondPoint(X, Y: Integer);
-    procedure SetParamsForSelectedFigrs(ACanvas: TCanvas);
     procedure Move(ADoublePoint: TDoublePoint); override;
     function IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;
       ARect: TDoubleRect): Boolean;
@@ -142,11 +145,25 @@ begin
   end;
 end;
 
+procedure TFigure.DrawSelectFrame(ABounds: TDoubleRect; ACanvas: TCanvas);
+var
+  Delta: integer = 5;
+begin
+  ACanvas.Pen.Color := clBlack;
+  ACanvas.Pen.Width := 1;
+  ACanvas.Pen.Style := psDash;
+  ABounds.Top    -=Delta;
+  ABounds.Left   -=Delta;
+  ABounds.Bottom +=Delta;
+  ABounds.Right  +=Delta;
+  ACanvas.Frame(WorldToScreen(ABounds));
+end;
+
   { PolyLine }
 
 constructor TPolyLine.Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
 begin
-  PenColor := APenColor;
+  FLineColor := APenColor;
   FLineWidth := AWidth;
   FLineStyle := APenStyle;
 end;
@@ -171,12 +188,12 @@ end;
 
 procedure TPolyLine.Draw(Canvas: TCanvas);
 begin
-  Canvas.Pen.Color   := PenColor;
+  if Selected then begin
+    DrawSelectFrame(Bounds, Canvas);
+  end;
+  Canvas.Pen.Color   := FLineColor;
   Canvas.Pen.Width   := FLineWidth;
   Canvas.Pen.Style   := FLineStyle;
-  if Selected then begin
-    Canvas.Pen.Color   := clAqua;
-  end;
   Canvas.Polyline(WorldPointsToScreen(Points));
 end;
 
@@ -246,13 +263,6 @@ begin
                        ScreenToWorldX(X), ScreenToWorldY(Y));
 end;
 
-procedure TTwoPointsFigure.SetParamsForSelectedFigrs(ACanvas: TCanvas);
-begin
-  ACanvas.Pen.Color   := clAqua;
-  ACanvas.Brush.Style := bsDiagCross;
-  ACanvas.Brush.Color := clAqua;
-end;
-
 function TTwoPointsFigure.IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;
   ARect: TDoubleRect): Boolean;
 begin
@@ -279,22 +289,23 @@ end;
 constructor TRectangle.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
   AWidth: integer; ABrushStyle: TFPBrushStyle);
 begin
-  PenColor    := APenColor;
+  FLineColor  := APenColor;
   FLineWidth  := AWidth;
   FLineStyle  := APenStyle;
-  FBrushColor :=ABrushColor;
-  FBrushStyle :=ABrushStyle;
+  FBrushColor := ABrushColor;
+  FBrushStyle := ABrushStyle;
 end;
 
 procedure TRectangle.Draw(Canvas: TCanvas);
 begin
-  Canvas.Pen.Color   := PenColor;
+  if Selected then begin
+    DrawSelectFrame(Bounds, Canvas);
+  end;
+  Canvas.Pen.Color   := FLineColor;
   Canvas.Brush.Color := FBrushColor;
   Canvas.Pen.Width   := FLineWidth;
   Canvas.Brush.Style := FBrushStyle;
   Canvas.Pen.Style   := FLineStyle;
-  if Selected then
-    SetParamsForSelectedFigrs(Canvas);
   Canvas.Rectangle(WorldToScreen(Bounds));
 end;
 
@@ -338,13 +349,14 @@ end;
 
 procedure TRoundRect.Draw(Canvas: TCanvas);
 begin
-  Canvas.Pen.Color   := PenColor;
+  if Selected then begin
+    DrawSelectFrame(Bounds, Canvas);
+  end;
+  Canvas.Pen.Color   := FLineColor;
   Canvas.Brush.Color := FBrushColor;
   Canvas.Pen.Width   := FLineWidth;
   Canvas.Brush.Style := FBrushStyle;
   Canvas.Pen.Style   := FLineStyle;
-  if Selected then
-    SetParamsForSelectedFigrs(Canvas);
   Canvas.RoundRect(WorldToScreen(Bounds), RadiusX, RadiusY);
 end;
 
@@ -372,28 +384,28 @@ begin
   DeleteObject(RoundRect);
 end;
 
-
   { TEllipse }
 
 constructor TEllipse.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
   AWidth: integer; ABrushStyle: TFPBrushStyle);
 begin
-  PenColor   := APenColor;
-  FLineWidth     := AWidth;
-  FLineStyle   := APenStyle;
+  FLineColor  := APenColor;
+  FLineWidth  := AWidth;
+  FLineStyle  := APenStyle;
   FBrushColor := ABrushColor;
   FBrushStyle := ABrushStyle;
 end;
 
 procedure TEllipse.Draw(Canvas: TCanvas);
 begin
-  Canvas.Pen.Color   := PenColor;
+  if Selected then begin
+    DrawSelectFrame(Bounds, Canvas);
+  end;
+  Canvas.Pen.Color   := FLineColor;
   Canvas.Brush.Color := FBrushColor;
   Canvas.Pen.Width   := FLineWidth;
   Canvas.Brush.Style := FBrushStyle;
   Canvas.Pen.Style   := FLineStyle;
-  if Selected then
-    SetParamsForSelectedFigrs(Canvas);
   Canvas.Ellipse(WorldToScreen(Bounds));
 end;
 
@@ -425,18 +437,19 @@ end;
 
 constructor TLine.Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
 begin
-  PenColor := APenColor;
+  FLineColor := APenColor;
   FLineWidth := AWidth;
   FLineStyle := APenStyle;
 end;
 
 procedure TLine.Draw(Canvas: TCanvas);
 begin
-  Canvas.Pen.Color   := PenColor;
+  if Selected then begin
+    DrawSelectFrame(Bounds, Canvas);
+  end;
+  Canvas.Pen.Color   := FLineColor;
   Canvas.Pen.Width   := FLineWidth;
   Canvas.Pen.Style   := FLineStyle;
-  if Selected then
-    SetParamsForSelectedFigrs(Canvas);
   Canvas.Line(WorldToScreen(Bounds));
 end;
 
@@ -490,14 +503,14 @@ var
   R: Double;
   MidlCoord: TDoublePoint;
 begin
-  Canvas.Pen.Color   := PenColor;
+ if Selected then begin
+    DrawSelectFrame(Bounds, Canvas);
+  end;
+  Canvas.Pen.Color   := FLineColor;
   Canvas.Brush.Color := FBrushColor;
   Canvas.Pen.Width   := FLineWidth;
   Canvas.Brush.Style := FBrushStyle;
   Canvas.Pen.Style   := FLineStyle;
-  if Selected then begin
-    SetParamsForSelectedFigrs(Canvas);
-  end;
   begin
     MidlCoord.X := (Bounds.Left + Bounds.Right) / 2;
     MidlCoord.Y := (Bounds.Top + Bounds.Bottom) / 2;

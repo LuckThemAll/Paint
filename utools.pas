@@ -71,6 +71,7 @@ type
     ParametersAvailable: Boolean;
     ParameterEditors: ArrayOfParameters;
     function GetFigure: TFigure;
+    function GetParameters: ArrayOfParameters; virtual; abstract;
     procedure AddParameter(AParameter: TParameterEditor);
     procedure Init(APanel: TPanel);
     procedure InitParameters; virtual; abstract;
@@ -123,7 +124,8 @@ type
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
-    procedure InitParameters;           override;
+    procedure InitParameters           override;
+    function GetParameters: ArrayOfParameters; override;
   end;
 
   TRectangleTool = class(TFilledTool)
@@ -133,7 +135,8 @@ type
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
-    procedure InitParameters;           override;
+    procedure InitParameters           override;
+    function GetParameters: ArrayOfParameters; override;
   end;
 
   TPolygonTool = class(TFilledTool)
@@ -144,7 +147,8 @@ type
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
-    procedure InitParameters;           override;
+    procedure InitParameters           override;
+    function GetParameters: ArrayOfParameters; override;
   end;
 
   TEllipseTool = class(TFilledTool)
@@ -155,6 +159,7 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
+    function GetParameters: ArrayOfParameters; override;
   end;
 
   TLineTool = class(TLinesTool)
@@ -164,7 +169,8 @@ type
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
-    procedure InitParameters;           override;
+    procedure InitParameters;          override;
+    function GetParameters: ArrayOfParameters; override;
   end;
 
 
@@ -177,6 +183,7 @@ type
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
     procedure InitParameters;           override;
+    function GetParameters: ArrayOfParameters; override;
   end;
 
   TSelectTool = class(TTool)
@@ -196,8 +203,16 @@ type
 var
   ToolRegistry: array of TTool;
   CurrentTool: TTool;
+  InvalidateHandler: procedure of Object;
 
 implementation
+
+procedure RegisterTool(Tool: TTool; AFigureClass: TFigureClass);
+begin
+  SetLength(ToolRegistry, Length(ToolRegistry) + 1);
+  ToolRegistry[High(ToolRegistry)] := Tool;
+  ToolRegistry[High(ToolRegistry)].FigureClass := AFigureClass;
+end;
 
   { TLineWidthParameter }
 
@@ -217,8 +232,16 @@ begin
 end;
 
 procedure TLineWidthParameter.onLineWidthChange(Sender: TObject);
+var
+  i: integer;
 begin
+  if not (CurrentTool is TSelectTool) then
   (CurrentTool as TLinesTool).FLineWidth := (Sender as TSpinEdit).Value
+  else
+      for i := 0 to High(Figures) do
+        if Figures[i].Selected then
+          (Figures[i] as TLinesFigure).FLineWidth := (Sender as TSpinEdit).Value;
+  InvalidateHandler;
 end;
 
   { TLineStyleParameter }
@@ -268,8 +291,16 @@ begin
 end;
 
 procedure TLineStyleParameter.onLineStyleChange(Sender: TObject);
+var
+  i: integer;
 begin
+  if not (CurrentTool is TSelectTool) then
   (CurrentTool as TLinesTool).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex)
+  else
+      for i := 0 to High(Figures) do
+        if Figures[i].Selected then
+          (Figures[i] as TLinesFigure).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex);
+  InvalidateHandler;
 end;
 
   { TBrushStyleParameter }
@@ -321,7 +352,13 @@ procedure TBrushStyleParameter.onBrushStyleChange(Sender: TObject);
 var
   i: Integer;
 begin
-  (CurrentTool as TFilledTool).FBrushStyle := TFPBrushStyle((Sender as TComboBox).ItemIndex)
+  if not (CurrentTool is TSelectTool) then
+    (CurrentTool as TFilledTool).FBrushStyle := TFPBrushStyle((Sender as TComboBox).ItemIndex)
+  else
+    for i := Low(Figures) to High(Figures) do
+      if Figures[i].Selected then
+        (Figures[i] as TFilledFigures).FBrushStyle := TFPBrushStyle((Sender as TComboBox).ItemIndex);
+  InvalidateHandler;
 end;
 
   { TNumberOfAnglesParameter }
@@ -341,8 +378,16 @@ begin
 end;
 
 procedure TNumberOfAnglesParameter.onNumOfAnglesChange(Sender: TObject);
+var
+  i: integer;
 begin
-  (CurrentTool as TPolygonTool).FNumberOfAngles := (Sender as TSpinEdit).Value
+  if not (CurrentTool is TSelectTool) then
+    (CurrentTool as TPolygonTool).FNumberOfAngles := (Sender as TSpinEdit).Value
+  else
+    for i := Low(Figures) to High(Figures) do
+      if Figures[i].Selected then
+        (Figures[i] as TPolygon).NumberOfAngles := (Sender as TSpinEdit).Value;
+  InvalidateHandler;
 end;
 
   { TRadiusXRoundRectParameter }
@@ -362,8 +407,16 @@ begin
 end;
 
 procedure TRadiusXRoundRectParameter.onRadiusXChange(Sender: TObject);
+var
+  i: integer;
 begin
-  (CurrentTool as TRoundRectTool).RadiusX := (Sender as TSpinEdit).Value
+  if not (CurrentTool is TSelectTool) then
+      (CurrentTool as TRoundRectTool).RadiusX := (Sender as TSpinEdit).Value
+    else
+      for i := Low(Figures) to High(Figures) do
+        if Figures[i].Selected then
+          (Figures[i] as TRoundRect).RadiusX := (Sender as TSpinEdit).Value;
+  InvalidateHandler;
 end;
 
   { TRadiusYRoundRectParameter }
@@ -383,8 +436,16 @@ begin
 end;
 
 procedure TRadiusYRoundRectParameter.onRadiusYChange(Sender: TObject);
+var
+  i: integer;
 begin
-  (CurrentTool as TRoundRectTool).RadiusY := (Sender as TSpinEdit).Value
+  if not (CurrentTool is TSelectTool) then
+      (CurrentTool as TRoundRectTool).RadiusY := (Sender as TSpinEdit).Value
+    else
+      for i := Low(Figures) to High(Figures) do
+        if Figures[i].Selected then
+          (Figures[i] as TRoundRect).RadiusY := (Sender as TSpinEdit).Value;
+  InvalidateHandler;
 end;
 
   { TZoomParameter }
@@ -434,28 +495,33 @@ begin
   FPanel := APanel;
   InitParameters;
   ShowParameters;
-  for i := Low(ParameterEditors) to High(ParameterEditors) do begin
-    FPanel.Height :=(
-      FPanel.Height +
-      ParameterEditors[i].FLabel.Height +
-      ParameterEditors[i].FComponent.Height);
-  end;
 end;
 
 procedure TTool.ShowParameters;
 var
   i: integer;
+  Delta: integer = 5;
 begin
+  for i := FPanel.ControlCount-1 downto 0 do (FPanel.Controls[i]).Free;
+  if Length(ParameterEditors) <> 0 then FPanel.Height := Delta
+  else
+    FPanel.Height := 0;
   for i := 0 to High(ParameterEditors) do begin
     with ParameterEditors[i] do begin
-      FLabel.Top        := i * 47;
+      FLabel.Top        := i * 40;
       FLabel.Left       := 2;
       FLabel.Parent     := FPanel;
-      FComponent.Top    := i * 47 + FLabel.ClientHeight;
+      FComponent.Top    := i * 40 + FLabel.ClientHeight;
       FComponent.Left   := 2;
       FComponent.Parent := FPanel;
     end;
   end;
+  for i := Low(ParameterEditors) to High(ParameterEditors) do begin
+    FPanel.Height :=(
+      FPanel.Height +
+      ParameterEditors[i].FLabel.Height +
+      ParameterEditors[i].FComponent.Height);
+  end
 end;
 
 function TTool.GetFigure: TFigure;
@@ -635,6 +701,13 @@ begin
   AddParameter(TLineStyleParameter.Create);
 end;
 
+function TPolylineTool.GetParameters: ArrayOfParameters;
+begin
+  SetLength(Result, 2);
+  Result[0] := TLineWidthParameter.Create;
+  Result[1] := TLineStyleParameter.Create;
+end;
+
   { TRectangleTool }
 
 constructor TRectangleTool.Create;
@@ -666,6 +739,14 @@ begin
   AddParameter(TLineWidthParameter.Create);
   AddParameter(TLineStyleParameter.Create);
   AddParameter(TBrushStyleParameter.Create);
+end;
+
+function TRectangleTool.GetParameters: ArrayOfParameters;
+begin
+  SetLength(Result, 3);
+  Result[0] := TLineWidthParameter.Create;
+  Result[1] := TLineStyleParameter.Create;
+  Result[2] := TBrushStyleParameter.Create;
 end;
 
   { TPolygonTool }
@@ -704,6 +785,15 @@ begin
   AddParameter(TNumberOfAnglesParameter.Create);
 end;
 
+function TPolygonTool.GetParameters: ArrayOfParameters;
+begin
+  SetLength(Result, 4);
+  Result[0] := TLineWidthParameter.Create;
+  Result[1] := TLineStyleParameter.Create;
+  Result[2] := TBrushStyleParameter.Create;
+  Result[3] := TNumberOfAnglesParameter.Create;
+end;
+
   { TEllipseTool }
 
 constructor TEllipseTool.Create;
@@ -737,6 +827,14 @@ begin
   AddParameter(TBrushStyleParameter.Create);
 end;
 
+function TEllipseTool.GetParameters: ArrayOfParameters;
+begin
+  SetLength(Result, 3);
+  Result[0] := TLineWidthParameter.Create;
+  Result[1] := TLineStyleParameter.Create;
+  Result[2] := TBrushStyleParameter.Create;
+end;
+
   { TLineTool }
 
 constructor TLineTool.Create;
@@ -767,6 +865,13 @@ begin
   ParametersAvailable := True;
   AddParameter(TLineWidthParameter.Create);
   AddParameter(TLineStyleParameter.Create);
+end;
+
+function TLineTool.GetParameters: ArrayOfParameters;
+begin
+  SetLength(Result, 2);
+  Result[0] := TLineWidthParameter.Create;
+  Result[1] := TLineStyleParameter.Create;
 end;
 
 { TRounRectTool }
@@ -805,6 +910,16 @@ begin
   AddParameter(TBrushStyleParameter.Create);
   AddParameter(TRadiusXRoundRectParameter.Create);
   AddParameter(TRadiusYRoundRectParameter.Create);
+end;
+
+function TRoundRectTool.GetParameters: ArrayOfParameters;
+begin
+  SetLength(Result, 5);
+  Result[0] := TLineWidthParameter.Create;
+  Result[1] := TLineStyleParameter.Create;
+  Result[2] := TBrushStyleParameter.Create;
+  Result[3] := TRadiusXRoundRectParameter.Create;
+  Result[4] := TRadiusYRoundRectParameter.Create;
 end;
 
   { TSelectTool }
@@ -860,13 +975,13 @@ begin
       if isFigureSelected(i) then
            SelectFigure(i);
   Figure := nil;
+  ParameterEditors := CrossParameters;
+  ShowParameters;
 end;
 
 procedure TSelectTool.InitParameters;
 begin
   ParametersAvailable := True;
-  AddParameter(TLineWidthParameter.Create);
-  AddParameter(TLineStyleParameter.Create);
 end;
 
 function TSelectTool.Equal(ADp: TDoublePoint; BDp: TDoublePoint):Boolean;
@@ -876,14 +991,40 @@ end;
 
 function TSelectTool.CrossParameters: ArrayOfParameters;
 var
-  i, j, h: integer;
-  CommonParameters: ArrayOfParameters;
+  i, j, h, k: Integer;
+  NeedDelet: Boolean;
+  Prop: ArrayOfParameters;
+  CommonParams: ArrayOfParameters;
 begin
-  for i := Low(Figures) to High(Figures) do
-    for j := i to High(Figures) do
-      if Figures[i].Selected then begin
-        AddParameter(TLineWidthParameter.Create);
+  CommonParams := nil;
+  Prop := nil;
+  for i := 0 to High(Figures) do
+    if Figures[i].Selected then begin
+      for j := 0 to High(ToolRegistry) do
+        if ToolRegistry[j].FigureClass = Figures[i].ClassType then begin
+            Prop := ToolRegistry[j].GetParameters;
+            Break;
+        end;
+      if Length(CommonParams) = 0 then begin
+        SetLength(CommonParams, Length(Prop));
+        CommonParams := Prop;
+      end
+      else begin
+        for k := 0 to High(CommonParams) do begin
+          NeedDelet := true;
+          for h := 0 to High(Prop) do
+            if CommonParams[k].ClassName = Prop[h].ClassName then
+            NeedDelet := false;
+          if NeedDelet then
+            CommonParams[k] := nil;
+        end;
       end;
+    end;
+  for i := 0 to High(CommonParams) do
+    if CommonParams[i] <> nil then begin
+      SetLength(Result, Length(Result) + 1);
+      Result[High(Result)] := CommonParams[i];
+    end;
 end;
 
 initialization

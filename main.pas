@@ -153,6 +153,7 @@ end;
 
 procedure TMainScreen.FormCreate(Sender: TObject);
 begin
+  InvalidateHandler := @Invalidate;
   SetPaletteColors;
   SetBtn;
   SetParametersPanel;
@@ -236,17 +237,26 @@ end;
 procedure TMainScreen.DrawGridMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 var
-  aCol, aRow: Integer;
+  aCol, aRow, i: Integer;
 begin
   DrawGrid.MouseToCell(X, Y, aCol, aRow);
   if Button = mbLeft then begin
     PenColor := Colors[aCol][aRow];
     PenColorPanel.Color := PenColor;
+    if CurrentTool is TSelectTool then;
+      for i := Low(Figures) to High(Figures) do
+        if Figures[i].Selected then
+          Figures[i].FLineColor := PenColorPanel.Color;
   end;
   if Button = mbRight then begin
     BrushColor := Colors[aCol][aRow];
     BrushColorPanel.Color := BrushColor;
+    if CurrentTool is TSelectTool then;
+      for i := Low(Figures) to High(Figures) do
+        if Figures[i].Selected then
+          Figures[i].FBrushColor := BrushColorPanel.Color;
   end;
+  Invalidate;
 end;
 
 procedure TMainScreen.DrawGridDblClick(Sender: TObject);
