@@ -41,7 +41,6 @@ Type
 end;
 
   TFilledFigures = class(TLinesFigure)
-    FBrushColor: TColor;
     FBrushStyle: TFPBrushStyle;
   end;
 
@@ -241,13 +240,12 @@ begin
     Points[i] += ADoublePoint;
   end;
   with Bounds do begin
-      Top += ADoublePoint.Y;
-      Left += ADoublePoint.X;
+      Top    += ADoublePoint.Y;
+      Left   += ADoublePoint.X;
       Bottom += ADoublePoint.Y;
-      Right += ADoublePoint.X;
+      Right  += ADoublePoint.X;
     end;
 end;
-
 
   { TTwoPointsFigure }
 
@@ -338,7 +336,7 @@ end;
 constructor TRoundRect.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
    AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
 begin
-  PenColor    := APenColor;
+  FLineColor  := APenColor;
   FLineWidth  := AWidth;
   FLineStyle  := APenStyle;
   FBrushColor := ABrushColor;
@@ -489,11 +487,11 @@ end;
 constructor TPolygon.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
   AWidth: integer; ABrushStyle: TFPBrushStyle; ANumberOfAngles: Integer);
 begin
-  PenColor       := APenColor;
-  FLineWidth          := AWidth;
-  FLineStyle       := APenStyle;
-  FBrushStyle     := ABrushStyle;
-  FBrushColor     := ABrushColor;
+  FLineColor     := APenColor;
+  FLineWidth     := AWidth;
+  FLineStyle     := APenStyle;
+  FBrushStyle    := ABrushStyle;
+  FBrushColor    := ABrushColor;
   NumberOfAngles := ANumberOfAngles;
 end;
 
@@ -549,7 +547,6 @@ begin
   Result := PtInRegion(Polygon, Point.x, Point.y);
   DeleteObject(Polygon);
 end;
-
 
 end.
 

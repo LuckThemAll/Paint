@@ -105,7 +105,7 @@ type
     procedure MouseMove(X, Y: integer); override;
     procedure MouseUp(X, Y: integer;
       AWidth, AHeight: Integer; Shift: TShiftState);        override;
-    procedure InitParameters;           override;
+    procedure InitParameters           override;
   end;
 
   TLinesTool = class(TTool)
@@ -475,12 +475,6 @@ end;
 
   { TTool }
 
-procedure RegisterTool(Tool: TTool; AFigureClass: TFigureClass);
-begin
-  SetLength(ToolRegistry, Length(ToolRegistry) + 1);
-  ToolRegistry[High(ToolRegistry)] := Tool;
-end;
-
 procedure TTool.AddParameter(AParameter: TParameterEditor);
 begin
   SetLength(ParameterEditors, Length(ParameterEditors) + 1);
@@ -613,7 +607,7 @@ end;
 
 procedure TZoomTool.InitParameters;
 begin
-  ParametersAvailable := true;
+  ParametersAvailable := True;
   AddParameter(TZoomParameter.Create);
 end;
 
@@ -660,7 +654,7 @@ end;
 
 procedure THandTool.InitParameters;
 begin
-  ParametersAvailable := False;
+  ParametersAvailable := false;
 end;
 
   { TPolylineTool }

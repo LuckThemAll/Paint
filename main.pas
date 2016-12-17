@@ -167,15 +167,11 @@ var
   b: TPanel;
 begin
     CurrentTool := ToolRegistry[(Sender as TBitBtn).Tag];
-    if (Sender as TBitBtn).Tag = 0 then PaintBox.Cursor := crSizeAll
-    else PaintBox.Cursor := crArrow;
+    PaintBox.Cursor := crArrow;
     ToolParameters.Destroy;
     SetParametersPanel;
     CurrentTool.Init(ToolParameters);
-    if CurrentTool.ParametersAvailable then
-      ToolParameters.Visible := True
-    else
-      ToolParameters.Visible := False;
+    ToolParameters.Visible := CurrentTool.ParametersAvailable;
     MainScreen.Invalidate;
 end;
 
