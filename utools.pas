@@ -561,6 +561,25 @@ begin
       Figures[i].Selected := false;
 end;
 
+  { TLinesTool }
+
+function TLinesTool.GetParameters: ArrayOfParameters;
+begin
+  SetLength(Result, 2);
+  Result[0] := TLineWidthParameter.Create;
+  Result[1] := TLineStyleParameter.Create;
+end;
+
+  { TFilldTool }
+
+function TFilledTool.GetParameters: ArrayOfParameters;
+begin
+  Inherited;
+  Result := Inherited;
+  SetLength(Result, Length(Result) + 1);
+  Result[High(Result)] := TBrushStyleParameter.Create;
+end;
+
   { TZoomTool }
 
 constructor TZoomTool.Create;
@@ -727,9 +746,8 @@ end;
 
 function TPolylineTool.GetParameters: ArrayOfParameters;
 begin
-  SetLength(Result, 2);
-  Result[0] := TLineWidthParameter.Create;
-  Result[1] := TLineStyleParameter.Create;
+  Inherited;
+  Result := Inherited;
 end;
 
   { TRectangleTool }
@@ -767,10 +785,8 @@ end;
 
 function TRectangleTool.GetParameters: ArrayOfParameters;
 begin
-  SetLength(Result, 3);
-  Result[0] := TLineWidthParameter.Create;
-  Result[1] := TLineStyleParameter.Create;
-  Result[2] := TBrushStyleParameter.Create;
+  Inherited;
+  Result := Inherited;
 end;
 
   { TPolygonTool }
@@ -811,11 +827,10 @@ end;
 
 function TPolygonTool.GetParameters: ArrayOfParameters;
 begin
-  SetLength(Result, 4);
-  Result[0] := TLineWidthParameter.Create;
-  Result[1] := TLineStyleParameter.Create;
-  Result[2] := TBrushStyleParameter.Create;
-  Result[3] := TNumberOfAnglesParameter.Create;
+  Inherited;
+  Result := Inherited;
+  SetLength(Result, Length(Result) + 1);
+  Result[High(Result)] := TNumberOfAnglesParameter.Create;
 end;
 
   { TEllipseTool }
@@ -853,10 +868,8 @@ end;
 
 function TEllipseTool.GetParameters: ArrayOfParameters;
 begin
-  SetLength(Result, 3);
-  Result[0] := TLineWidthParameter.Create;
-  Result[1] := TLineStyleParameter.Create;
-  Result[2] := TBrushStyleParameter.Create;
+  Inherited;
+  Result := Inherited;
 end;
 
   { TLineTool }
@@ -893,9 +906,8 @@ end;
 
 function TLineTool.GetParameters: ArrayOfParameters;
 begin
-  SetLength(Result, 2);
-  Result[0] := TLineWidthParameter.Create;
-  Result[1] := TLineStyleParameter.Create;
+  Inherited;
+  Result := Inherited;
 end;
 
 { TRounRectTool }
@@ -938,12 +950,11 @@ end;
 
 function TRoundRectTool.GetParameters: ArrayOfParameters;
 begin
-  SetLength(Result, 5);
-  Result[0] := TLineWidthParameter.Create;
-  Result[1] := TLineStyleParameter.Create;
-  Result[2] := TBrushStyleParameter.Create;
-  Result[3] := TRadiusXRoundRectParameter.Create;
-  Result[4] := TRadiusYRoundRectParameter.Create;
+  Inherited;
+  Result := Inherited;
+  SetLength(Result, Length(Result) + 2);
+  Result[High(Result) - 1] := TRadiusXRoundRectParameter.Create;
+  Result[High(Result)] := TRadiusYRoundRectParameter.Create;
 end;
 
   { TSelectTool }
@@ -1038,7 +1049,7 @@ begin
         for k := 0 to High(CommonParams) do begin
           NeedDelet := true;
           for h := 0 to High(Prop) do
-            if CommonParams[k].ClassName = Prop[h].ClassName then
+            if (CommonParams[k] <> nil) and (CommonParams[k].ClassName = Prop[h].ClassName) then
             NeedDelet := false;
           if NeedDelet then
             CommonParams[k] := nil;
