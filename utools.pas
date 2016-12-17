@@ -15,19 +15,22 @@ type
   { TParameters }
 
   TParameterEditor = class
-      FLabel: TLabel;
-      FComponent: TControl;
-      constructor Create; virtual; abstract;
-    end;
+  public
+    FLabel: TLabel;
+    FComponent: TControl;
+    constructor Create; virtual; abstract;
+  end;
 
   ArrayOfParameters = array of TParameterEditor;
 
   TLineWidthParameter = class(TParameterEditor)
+  public
     constructor Create; override;
     procedure onLineWidthChange(Sender: TObject);
   end;
 
   TLineStyleParameter = class(TParameterEditor)
+  public
     constructor Create; override;
     procedure onLineStyleChange(Sender: TObject);
     procedure OnDrawLineStyleItem(Control: TWinControl;
@@ -35,6 +38,7 @@ type
   end;
 
   TBrushStyleParameter = class(TParameterEditor)
+  public
     constructor Create; override;
     procedure onBrushStyleChange(Sender: TObject);
     procedure OnDrawBrushStyleItem(Control: TWinControl;
@@ -42,21 +46,25 @@ type
   end;
 
   TNumberOfAnglesParameter = class(TParameterEditor)
+  public
     constructor Create; override;
     procedure onNumOfAnglesChange(Sender: TObject);
   end;
 
   TZoomParameter = class(TParameterEditor)
+  public
     constructor Create; override;
     procedure onZoomChange(Sender: TObject);
   end;
 
   TRadiusXRoundRectParameter = class(TParameterEditor)
+  public
     constructor Create; override;
     procedure onRadiusXChange(Sender: TObject);
   end;
 
   TRadiusYRoundRectParameter = class(TParameterEditor)
+  public
     constructor Create; override;
     procedure onRadiusYChange(Sender: TObject);
   end;
@@ -64,12 +72,14 @@ type
   { TTools }
 
   TTool = class
-    FIcon: String;
+  private
     Figure: TFigure;
     FPanel: TPanel;
     FigureClass: TFigureClass;
-    ParametersAvailable: Boolean;
     ParameterEditors: ArrayOfParameters;
+  public
+    FIcon: String;
+    ParametersAvailable: Boolean;
     function GetFigure: TFigure;
     function GetParameters: ArrayOfParameters; virtual; abstract;
     procedure AddParameter(AParameter: TParameterEditor);
@@ -85,7 +95,9 @@ type
   end;
 
   THandTool = class(TTool)
+  private
     FCurrentPoint: TDoublePoint;
+  public
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -96,9 +108,11 @@ type
   end;
 
   TZoomTool = class(TTool)
+  private
     FFirstPoint, FSecondPoint: TDoublePoint;
     ZoomKoef: Double;
     ZoomParameter: String;
+  public
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -109,15 +123,22 @@ type
   end;
 
   TLinesTool = class(TTool)
+  private
     FLineWidth: integer;
     FLineStyle: TFPPenStyle;
+  public
+    function GetParameters: ArrayOfParameters; override;
   end;
 
   TFilledTool = class(TLinesTool)
+  private
     FBrushStyle: TFPBrushStyle;
+  public
+    function GetParameters: ArrayOfParameters; override;
   end;
 
   TPolyLineTool = class(TLinesTool)
+  public
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -129,6 +150,7 @@ type
   end;
 
   TRectangleTool = class(TFilledTool)
+  public
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -140,7 +162,9 @@ type
   end;
 
   TPolygonTool = class(TFilledTool)
+  private
     FNumberOfAngles: Integer;
+  public
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -152,6 +176,7 @@ type
   end;
 
   TEllipseTool = class(TFilledTool)
+  public
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -163,6 +188,7 @@ type
   end;
 
   TLineTool = class(TLinesTool)
+  public
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -175,7 +201,9 @@ type
 
 
   TRoundRectTool = class(TFilledTool)
+  private
     RadiusX, RadiusY: integer;
+  public
     constructor Create;
     procedure MouseDown(X, Y: integer;
       APenColor, ABrushColor: TColor);  override;
@@ -187,7 +215,9 @@ type
   end;
 
   TSelectTool = class(TTool)
+  private
     FFirstPoint, FSecondPoint: TDoublePoint;
+  public
     constructor Create;
     function Equal(ADp: TDoublePoint; BDp: TDoublePoint):Boolean;
     procedure MouseDown(X, Y: integer;
@@ -937,7 +967,8 @@ begin
   FSecondPoint := ScreenToWorld(X, Y);
 end;
 
-procedure TSelectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer; Shift: TShiftState);
+procedure TSelectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer;
+  Shift: TShiftState);
 
 function isFigureSelected(k: integer):Boolean;
 begin
