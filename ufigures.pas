@@ -5,7 +5,7 @@ unit UFigures;
 interface
 
 uses
-  Classes, SysUtils, windows, Graphics, UScale, math, FPCanvas;
+  Classes, SysUtils, windows, Graphics, UScale, math, FPCanvas, TypInfo;
 
 Type
 
@@ -24,12 +24,14 @@ Type
     function IsPointInside(ABounds: TDoubleRect): Boolean; virtual; abstract;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   virtual; abstract;
     function AreSegmentsIntersect(A1, A2, B1, B2: TDoublePoint): Boolean;
+    function Save: StrArr; virtual; abstract;
   end;
 
   TLinesFigure = class(TFigure)
   public
     FLineStyle: TFPPenStyle;
     FLineWidth: Integer;
+    function Save: StrArr; override;
   end;
 
   TPolyLine = class(TLinesFigure)
@@ -41,11 +43,13 @@ Type
     procedure Move(ADoublePoint: TDoublePoint); override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
+    function Save: StrArr; override;
 end;
 
   TFilledFigures = class(TLinesFigure)
   public
     FBrushStyle: TFPBrushStyle;
+    function Save: StrArr; override;
   end;
 
   { TTwoPointsFigure }
@@ -57,6 +61,7 @@ end;
     procedure Move(ADoublePoint: TDoublePoint); override;
     function IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;
       ARect: TDoubleRect): Boolean;
+    function Save: StrArr; override;
   end;
 
   TRectangle = class(TTwoPointsFigure)
@@ -76,6 +81,7 @@ end;
     procedure Draw(Canvas: TCanvas); override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function Save: StrArr; override;
   end;
 
   TEllipse = class(TTwoPointsFigure)
@@ -93,6 +99,7 @@ end;
     procedure Draw(Canvas: TCanvas); override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function Save: StrArr; override;
   end;
 
   TFrame = class(TTwoPointsFigure)
@@ -109,6 +116,7 @@ end;
     procedure Draw(Canvas: TCanvas); override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function Save: StrArr; override;
   end;
 
 procedure SaveActualFigure(Figure: TFigure);
@@ -258,6 +266,46 @@ begin
     end;
 end;
 
+function TPolyLine.Save: StrArr;
+var
+  i: integer;
+begin
+  SetLength(Result, 5);
+  Result[0] := ClassName;
+  for i := Low(Points) to High(Points) do
+    Result[1] := Result[1] + ' ' + FloatToStr(Points[i].X) + ' ' + FloatToStr(Points[i].Y);
+  Result[2] := IntToStr(FLineWidth);
+  Result[3] := GetEnumName(TypeInfo(TFPPenStyle),ord(FLineStyle));
+  Result[4] := ColorToString(FLineColor);
+end;
+
+  { TLinesFigure }
+
+function TLinesFigure.Save: StrArr;
+begin
+  SetLength(Result, 5);
+  Result[0] := ClassName;
+  with Bounds do
+  Result[1] := FloatToStr(Top) + ' ' +
+               FloatToStr(Left) + ' ' +
+               FloatToStr(Bottom) + ' ' +
+               FloatToStr(Right);
+  Result[2] := IntToStr(FLineWidth);
+  Result[3] := GetEnumName(TypeInfo(TFPPenStyle),ord(FLineStyle));
+  Result[4] := ColorToString(FLineColor);
+end;
+
+  { TFilledFigure }
+
+function TFilledFigures.Save: StrArr;
+begin
+  Inherited;
+  Result := Inherited;
+  SetLength(Result, Length(Result) + 2);
+  Result[High(Result) - 1] := GetEnumName(TypeInfo(TBrushStyle),ord(FBrushStyle));
+  Result[High(Result)]     := ColorToString(FBrushColor);
+end;
+
   { TTwoPointsFigure }
 
 procedure TTwoPointsFigure.AddFirstPoint(X, Y: Integer);
@@ -291,6 +339,12 @@ procedure TTwoPointsFigure.Move(ADoublePoint: TDoublePoint);
 begin
   Bounds.BottomRight += ADoublePoint;
   Bounds.TopLeft += ADoublePoint;
+end;
+
+function TTwoPointsFigure.Save: StrArr;
+begin
+  Inherited;
+  Result := Inherited;
 end;
 
   { TRectangle }
@@ -393,6 +447,15 @@ begin
   DeleteObject(RoundRect);
 end;
 
+function TRoundRect.Save: StrArr;
+begin
+  Inherited;
+  Result := Inherited;
+  SetLength(Result, Length(Result) + 2);
+  Result[High(Result) - 1] := IntToStr(RadiusX);
+  Result[High(Result)] := IntToStr(RadiusY);
+end;
+
   { TEllipse }
 
 constructor TEllipse.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
@@ -483,6 +546,19 @@ begin
    Result := true;
 end;
 
+function TLine.Save: StrArr;
+begin
+  SetLength(Result, 5);
+  Result[0] := ClassName;
+  Result[1] := FloatToStr(Bounds.Top) + ' ' +
+               FloatToStr(Bounds.Left) + ' ' +
+               FloatToStr(Bounds.Bottom) + ' ' +
+               FloatToStr(Bounds.Right);
+  Result[2] := IntToStr(FLineWidth);
+  Result[3] := GetEnumName(TypeInfo(TFPPenStyle),ord(FLineStyle));
+  Result[4] := ColorToString(FLineColor);
+end;
+
   { TFrame }
 
 procedure TFrame.Draw(Canvas: TCanvas);
@@ -557,6 +633,14 @@ begin
   Point := WorldToScreen(DoublePoint(ABounds.Left, ABounds.Top));
   Result := PtInRegion(Polygon, Point.x, Point.y);
   DeleteObject(Polygon);
+end;
+
+function TPolygon.Save: StrArr;
+begin
+Inherited;
+  Result := Inherited;
+  SetLength(Result, Length(Result) + 1);
+  Result[High(Result)] := IntToStr(NumberOfAngles);
 end;
 
 end.

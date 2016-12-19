@@ -20,6 +20,8 @@ type
     BrushColorPanel: TPanel;
     BlackSquare: TPanel;
     FullExtent: TMenuItem;
+    SaveAsBtn: TMenuItem;
+    Save: TMenuItem;
     ScaleEdit: TFloatSpinEdit;
     ScrollBarRight: TScrollBar;
     ScrollBarBottom: TScrollBar;
@@ -34,6 +36,7 @@ type
     PaintBox: TPaintBox;
     ToolsPanel: TPanel;
     WidthChange: TTrackBar;
+    SaveImageDialog: TSaveDialog;
     procedure DrawGridDblClick(Sender: TObject);
     procedure DrawGridMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -51,6 +54,8 @@ type
       MousePos: TPoint; var Handled: Boolean);
     procedure PaintBoxMouseWheelUp(Sender: TObject; Shift: TShiftState;
       MousePos: TPoint; var Handled: Boolean);
+    procedure SaveAsBtnClick(Sender: TObject);
+    procedure SaveClick(Sender: TObject);
     procedure ScaleEditChange(Sender: TObject);
     procedure ScrollBarBottomScroll(Sender: TObject; ScrollCode: TScrollCode;
       var ScrollPos: Integer);
@@ -70,6 +75,8 @@ type
     procedure SetPaletteColors;
     procedure SetParametersPanel;
     procedure SetBtn;
+    procedure WriteToFile(AFileName: string);
+    procedure UpdateFileName;
   private
     { private declarations }
   public
@@ -80,6 +87,7 @@ const
   paletteSize: TPoint = (X: 35; Y: 8);
     rows: integer = 8;
     cols: integer = 35;
+  Signature = '@PaintEmulatorFormat';
 
 var
   MainScreen: TMainScreen;
@@ -87,6 +95,8 @@ var
   Colors: array [0..34] of array [0..7] of integer;
   ToolParameters: TPanel;
   PenColor, BrushColor: TColor;
+  ImageName, LastSavedFileName: string;
+
 
 implementation
 
@@ -158,6 +168,7 @@ begin
   SetBtn;
   SetParametersPanel;
   ToolParameters.Visible := False;
+  ImageName := 'Image1.pef';
 end;
 
   { Btn }
@@ -304,6 +315,8 @@ begin
         UpdateBorderCoords(Right, Bottom);
       end;
   end;
+  if FileWasChanged then
+    UpdateFileName;
   MainScreen.Invalidate;
 end;
 
@@ -403,6 +416,78 @@ begin
   PaintBox.Invalidate;
 end;
 
+procedure TMainScreen.SaveAsBtnClick(Sender: TObject);
+var
+  f: TextFile;
+  Reply, BoxStyle: Integer;
+  tempObject: TObject;
+begin
+  SaveImageDialog := TSaveDialog.Create(self);
+  with SaveImageDialog do begin
+    InitialDir := GetCurrentDir;
+    Title      := 'Save image as Paint Emulator Format';
+    DefaultExt := 'pef';
+    Filter     := 'Paint Emulator Format|*.pef|';
+    FileName   := ImageName;
+  end;
+  if SaveImageDialog.Execute then begin
+    if FileExists(SaveImageDialog.FileName) then begin
+      BoxStyle := MB_ICONQUESTION + MB_YESNO;
+      Reply := Application.MessageBox('Overwrite file?', 'Overwrite file dialog', BoxStyle);
+      if (Reply = IDYES) then begin
+        WriteToFile(SaveImageDialog.FileName);
+      end
+      else begin
+        SaveImageDialog.Free;
+        tempObject := TObject.Create;
+        SaveAsBtnClick(tempObject);
+        tempObject.Free;
+        Exit;
+      end;
+    end
+    else begin
+      WriteToFile(SaveImageDialog.FileName);
+    end;
+  end;
+  SaveImageDialog.Free;
+end;
+
+procedure TMainScreen.SaveClick(Sender: TObject);
+begin
+  FileWasChanged := False;
+  if (LastSavedFileName = ImageName) then
+    WriteToFile(ImageName)
+  else
+    SaveAsBtnClick(TObject.Create);
+end;
+
+procedure TMainScreen.WriteToFile(AFileName: string);
+var
+  f: TextFile;
+  i,j: integer;
+begin
+  AssignFile(f,AFileName);
+  DeleteFile(AFileName);
+  Rewrite(f);
+  WriteLn(f, Signature);
+  WriteLn(f, length(Figures));
+  for i := Low(Figures) to High(Figures) do
+  begin
+    for j := low((Figures[i]).Save) to high((Figures[i]).Save) do
+      WriteLn(f,(Figures[i]).Save[j]);
+  end;
+  CloseFile(f);
+  ImageName := AFileName;
+  LastSavedFileName := AFileName;
+  FileWasChanged := False;
+  UpdateFileName;
+end;
+
+procedure TMainScreen.UpdateFileName;
+begin
+  MainScreen.Caption := 'PaintEmulator - ' + ImageName;
+  if FileWasChanged then MainScreen.Caption := '*' + MainScreen.Caption;
+end;
 
 
 initialization

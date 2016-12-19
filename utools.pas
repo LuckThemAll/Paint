@@ -234,6 +234,7 @@ var
   ToolRegistry: array of TTool;
   CurrentTool: TTool;
   InvalidateHandler: procedure of Object;
+  FileWasChanged, FileWasSaved: boolean;
 
 implementation
 
@@ -716,7 +717,9 @@ end;
 
 procedure TPolyLineTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  FileWasChanged := True;
   UnselectAll;
+  if FLineWidth = 0 then FLineWidth := 1;
   Figure := TPolyline.Create(APenColor, FLineStyle, FLineWidth);
   with Figure.Bounds do begin
     Top := ScreenToWorld(X, Y).Y;
@@ -760,7 +763,9 @@ end;
 
 procedure TRectangleTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  FileWasChanged := True;
   UnselectAll;
+  if FLineWidth = 0 then FLineWidth := 1;
   Figure := TRectangle.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle);
   (Figure as TRectangle).AddFirstPoint(X, Y);
 end;
@@ -800,7 +805,9 @@ end;
 
 procedure TPolygonTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  FileWasChanged := True;
   UnselectAll;
+  if FLineWidth = 0 then FLineWidth := 1;
   Figure := TPolygon.Create(APenColor, ABrushColor, FLineStyle, FLineWidth,
     FBrushStyle, FNumberOfAngles);
   (Figure as TPolygon).AddFirstPoint(X, Y);
@@ -843,7 +850,9 @@ end;
 
 procedure TEllipseTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  FileWasChanged := True;
   UnselectAll;
+  if FLineWidth = 0 then FLineWidth := 1;
   Figure := TEllipse.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle);
   (Figure as TEllipse).AddFirstPoint(X, Y);
 end;
@@ -882,7 +891,9 @@ end;
 
 procedure TLineTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  FileWasChanged := True;
   UnselectAll;
+  if FLineWidth = 0 then FLineWidth := 1;
   Figure := TLine.Create(APenColor, FLineStyle, FLineWidth);
   (Figure as TLine).AddFirstPoint(X, Y);
 end;
@@ -922,7 +933,9 @@ end;
 
 procedure TRoundRectTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
+  FileWasChanged := True;
   UnselectAll;
+  if FLineWidth = 0 then FLineWidth := 1;
   Figure := TRoundRect.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle,
     RadiusX, RadiusY);
   (Figure as TRoundRect).AddFirstPoint(X, Y);
