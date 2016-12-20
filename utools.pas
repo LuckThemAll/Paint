@@ -270,8 +270,10 @@ begin
   (CurrentTool as TLinesTool).FLineWidth := (Sender as TSpinEdit).Value
   else
       for i := 0 to High(Figures) do
-        if Figures[i].Selected then
+        if Figures[i].Selected then begin
           (Figures[i] as TLinesFigure).FLineWidth := (Sender as TSpinEdit).Value;
+          FileWasChanged := True;
+        end;
   InvalidateHandler;
 end;
 
@@ -329,8 +331,10 @@ begin
   (CurrentTool as TLinesTool).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex)
   else
       for i := 0 to High(Figures) do
-        if Figures[i].Selected then
+        if Figures[i].Selected then begin
           (Figures[i] as TLinesFigure).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex);
+          FileWasChanged := True;
+        end;
   InvalidateHandler;
 end;
 
@@ -387,8 +391,10 @@ begin
     (CurrentTool as TFilledTool).FBrushStyle := TFPBrushStyle((Sender as TComboBox).ItemIndex)
   else
     for i := Low(Figures) to High(Figures) do
-      if Figures[i].Selected then
+      if Figures[i].Selected then begin
         (Figures[i] as TFilledFigures).FBrushStyle := TFPBrushStyle((Sender as TComboBox).ItemIndex);
+        FileWasChanged := True;
+      end;
   InvalidateHandler;
 end;
 
@@ -416,8 +422,10 @@ begin
     (CurrentTool as TPolygonTool).FNumberOfAngles := (Sender as TSpinEdit).Value
   else
     for i := Low(Figures) to High(Figures) do
-      if Figures[i].Selected then
+      if Figures[i].Selected then begin
         (Figures[i] as TPolygon).NumberOfAngles := (Sender as TSpinEdit).Value;
+        FileWasChanged := True;
+      end;
   InvalidateHandler;
 end;
 
@@ -445,8 +453,10 @@ begin
       (CurrentTool as TRoundRectTool).RadiusX := (Sender as TSpinEdit).Value
     else
       for i := Low(Figures) to High(Figures) do
-        if Figures[i].Selected then
+        if Figures[i].Selected then begin
           (Figures[i] as TRoundRect).RadiusX := (Sender as TSpinEdit).Value;
+          FileWasChanged := True;
+        end;
   InvalidateHandler;
 end;
 
@@ -474,8 +484,10 @@ begin
       (CurrentTool as TRoundRectTool).RadiusY := (Sender as TSpinEdit).Value
     else
       for i := Low(Figures) to High(Figures) do
-        if Figures[i].Selected then
+        if Figures[i].Selected then begin
           (Figures[i] as TRoundRect).RadiusY := (Sender as TSpinEdit).Value;
+          FileWasChanged := True;
+        end;
   InvalidateHandler;
 end;
 
@@ -685,10 +697,12 @@ begin
   for i := Low(Figures) to High(Figures) do
     if Figures[i].Selected then
       Selected:=True;
-  if Selected then
-  for i := Low(Figures) to High(Figures) do
-    if Figures[i].Selected then
-      Figures[i].Move(NewWorldCoords);
+  if Selected then begin
+    FileWasChanged := True;
+    for i := Low(Figures) to High(Figures) do
+      if Figures[i].Selected then
+        Figures[i].Move(NewWorldCoords);
+  end;
   if not Selected then
     ChangeScreenCoords(
       FCurrentPoint.X - ScreenToWorldX(X),

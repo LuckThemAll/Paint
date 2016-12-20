@@ -20,6 +20,7 @@ type
     BrushColorPanel: TPanel;
     BlackSquare: TPanel;
     FullExtent: TMenuItem;
+    OpenBtn: TMenuItem;
     SaveAsBtn: TMenuItem;
     Save: TMenuItem;
     ScaleEdit: TFloatSpinEdit;
@@ -37,6 +38,7 @@ type
     ToolsPanel: TPanel;
     WidthChange: TTrackBar;
     SaveImageDialog: TSaveDialog;
+    OpenImageDialog: TOpenDialog;
     procedure DrawGridDblClick(Sender: TObject);
     procedure DrawGridMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -48,6 +50,7 @@ type
     procedure AboutBtnClick(Sender: TObject);
     procedure FormPaint(Sender: TObject);
     procedure FullExtentClick(Sender: TObject);
+    procedure OpenBtnClick(Sender: TObject);
     procedure PaintBoxMouseEnter(Sender: TObject);
     procedure PaintBoxMouseLeave(Sender: TObject);
     procedure PaintBoxMouseWheelDown(Sender: TObject; Shift: TShiftState;
@@ -77,6 +80,7 @@ type
     procedure SetBtn;
     procedure WriteToFile(AFileName: string);
     procedure UpdateFileName;
+    procedure UpdateScreenCoords;
   private
     { private declarations }
   public
@@ -336,6 +340,8 @@ begin
   UScale.SetCoordsForBars(CanvasCoords, ImageCoords);
   if MouseOnPaintBox then
     SetScrollBarsParameters(CanvasCoords);
+  if FileWasChanged then
+    UpdateFileName;
 end;
 
 procedure TMainScreen.SetScrollBarsParameters(ARect: TDoubleRect);
@@ -420,7 +426,6 @@ procedure TMainScreen.SaveAsBtnClick(Sender: TObject);
 var
   f: TextFile;
   Reply, BoxStyle: Integer;
-  tempObject: TObject;
 begin
   SaveImageDialog := TSaveDialog.Create(self);
   with SaveImageDialog do begin
@@ -439,9 +444,7 @@ begin
       end
       else begin
         SaveImageDialog.Free;
-        tempObject := TObject.Create;
-        SaveAsBtnClick(tempObject);
-        tempObject.Free;
+        SaveAsBtnClick(TObject.Create);
         Exit;
       end;
     end
@@ -483,10 +486,64 @@ begin
   UpdateFileName;
 end;
 
+procedure TMainScreen.OpenBtnClick(Sender: TObject);
+var
+ f: TextFile;
+ i, j, CountOfFigures, CountOfParameters: Integer;
+ FileSignature, FigureName: String;
+ AParameters: StrArr;
+ b: TDoubleRect;
+begin
+  OpenImageDialog := TOpenDialog.Create(Self);
+  with OpenImageDialog do begin
+    InitialDir := GetCurrentDir;
+    Filter     := 'Paint Emulator Format|*.pef|';
+    Title      := 'Open a Paint Emulator Format';
+    DefaultExt := 'pef';
+  end;
+  LastSavedFileName := OpenImageDialog.FileName;
+  if OpenImageDialog.Execute then begin
+    AssignFile(f, OpenImageDialog.FileName);
+    Reset(f);
+    ReadLn(f, FileSignature);
+    if (FileSignature <> Signature) then begin
+      ShowMessage('Invalid file');
+      CloseFile(f);
+      Exit;
+    end;
+    ReadLn(f, CountOfFigures);
+    SetLength(Figures, CountOfFigures);
+    for i := low(Figures) to high(Figures) do begin
+      ReadLn(f, FigureName);
+      ReadLn(f, CountOfParameters);
+      case FigureName of
+        'TPolyLine' : Figures[i] := TPolyLine.Create(clBlack, psSolid, 1);
+        'TLine'     : Figures[i] := TLine.Create(clBlack, psSolid, 1);
+        'TRectangle': Figures[i] := TRectangle.Create(clBlack, clBlack, psSolid, 1, bsSolid);
+        'TEllipse'  : Figures[i] := TEllipse.Create(clBlack, clBlack, psSolid, 1, bsSolid);
+        'TRoundRect': Figures[i] := TRoundRect.Create(clBlack, clBlack, psSolid, 1, bsSolid, 0, 0);
+        'TPolygon'  : Figures[i] := TPolygon.Create(clBlack, clBlack, psSolid, 1, bsSolid, 3);
+      end;
+      SetLength(AParameters, CountOfParameters);
+      for j := 0 to High(AParameters) do
+        ReadLn(f, AParameters[j]);
+      Figures[i].Load(AParameters);
+    end;
+    CloseFile(f);
+    SetScreenCoords(0, 0);
+    UpdateScreenCoords;
+    SetCoordsForBars(CanvasCoords, ImageCoords);
+    MainScreen.Invalidate;
+  end;
+end;
+
 procedure TMainScreen.UpdateFileName;
 begin
   MainScreen.Caption := 'PaintEmulator - ' + ImageName;
-  if FileWasChanged then MainScreen.Caption := '*' + MainScreen.Caption;
+  if FileWasChanged then begin
+    MainScreen.Caption := '*' + MainScreen.Caption;
+    FileWasChanged := False;
+  end;
 end;
 
 

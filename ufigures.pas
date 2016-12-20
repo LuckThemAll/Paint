@@ -5,7 +5,7 @@ unit UFigures;
 interface
 
 uses
-  Classes, SysUtils, windows, Graphics, UScale, math, FPCanvas, TypInfo;
+  Classes, SysUtils, windows, Graphics, UScale, math, FPCanvas, TypInfo, strutils;
 
 Type
 
@@ -21,6 +21,9 @@ Type
     procedure Draw(Canvas: TCanvas); virtual; abstract;
     procedure Move(ADoublePoint: TDoublePoint); virtual; abstract;
     procedure DrawSelectFrame(ABounds: TDoubleRect; ACanvas: TCanvas); virtual;
+    procedure Load(AParameters: StrArr); virtual; abstract;
+    procedure SetMaxBounds(ABounds: TDoubleRect);
+    procedure UpdateBounds(AX, AY: Double);virtual;
     function IsPointInside(ABounds: TDoubleRect): Boolean; virtual; abstract;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   virtual; abstract;
     function AreSegmentsIntersect(A1, A2, B1, B2: TDoublePoint): Boolean;
@@ -31,6 +34,7 @@ Type
   public
     FLineStyle: TFPPenStyle;
     FLineWidth: Integer;
+    procedure Load(AParameters: StrArr); override;
     function Save: StrArr; override;
   end;
 
@@ -41,6 +45,7 @@ Type
     procedure AddPoint(X, Y: Integer);
     procedure Draw(Canvas: TCanvas); override;
     procedure Move(ADoublePoint: TDoublePoint); override;
+    procedure Load(AParameters: StrArr); override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function Save: StrArr; override;
@@ -49,6 +54,7 @@ end;
   TFilledFigures = class(TLinesFigure)
   public
     FBrushStyle: TFPBrushStyle;
+    procedure Load(AParameters: StrArr); override;
     function Save: StrArr; override;
   end;
 
@@ -59,6 +65,7 @@ end;
     procedure AddFirstPoint(X, Y: Integer);
     procedure AddSecondPoint(X, Y: Integer);
     procedure Move(ADoublePoint: TDoublePoint); override;
+    procedure Load(AParameters: StrArr); override;
     function IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;
       ARect: TDoubleRect): Boolean;
     function Save: StrArr; override;
@@ -79,6 +86,7 @@ end;
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle; ARadiusX, ARadiusY: integer);
     procedure Draw(Canvas: TCanvas); override;
+    procedure Load(AParameters: StrArr); override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
     function Save: StrArr; override;
@@ -97,6 +105,7 @@ end;
   public
     constructor Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
     procedure Draw(Canvas: TCanvas); override;
+    procedure Load(AParameters: StrArr); override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
     function Save: StrArr; override;
@@ -114,6 +123,7 @@ end;
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle; ANumberOfAngles: Integer);
     procedure Draw(Canvas: TCanvas); override;
+    procedure Load(AParameters: StrArr); override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
     function Save: StrArr; override;
@@ -130,6 +140,15 @@ procedure SaveActualFigure(Figure: TFigure);
 begin
   SetLength(Figures, Length(Figures) + 1);
   Figures[High(Figures)] := Figure;
+end;
+
+function StrToStrPoint(AString: string; k: integer): String;
+begin
+  Result := '';
+  while (AString[k] <> ' ') do begin
+    Result += AString[k];
+    Inc(k);
+  end;
 end;
 
   { TFigure }
@@ -175,6 +194,26 @@ begin
   ABounds.Bottom +=Delta;
   ABounds.Right  +=Delta;
   ACanvas.Frame(WorldToScreen(ABounds));
+end;
+
+procedure TFigure.SetMaxBounds(ABounds: TDoubleRect);
+begin
+  ABounds.Top    := MaxInt;
+  ABounds.Left   := MaxInt;
+  ABounds.Bottom := -MaxInt;
+  ABounds.Right  := -MaxInt;
+end;
+
+procedure TFigure.UpdateBounds(AX, AY: Double);
+begin
+  if Bounds.Left > AX then
+    Bounds.Left := AX;
+  if Bounds.Top > AY then
+    Bounds.Top := AY;
+  if Bounds.Right < AX then
+    Bounds.Right := AX;
+  if Bounds.Bottom < AY then
+    Bounds.Bottom := AY;
 end;
 
   { PolyLine }
@@ -270,29 +309,86 @@ function TPolyLine.Save: StrArr;
 var
   i: integer;
 begin
-  SetLength(Result, 5);
+  SetLength(Result, 6);
   Result[0] := ClassName;
-  for i := Low(Points) to High(Points) do
-    Result[1] := Result[1] + ' ' + FloatToStr(Points[i].X) + ' ' + FloatToStr(Points[i].Y);
-  Result[2] := IntToStr(FLineWidth);
-  Result[3] := GetEnumName(TypeInfo(TFPPenStyle),ord(FLineStyle));
-  Result[4] := ColorToString(FLineColor);
+  Result[1] := IntToStr(Length(Result) - 2);
+  Result[2] := FloatToStr(Points[0].X) + ' ' + FloatToStr(Points[0].Y);
+  for i := (Low(Points) + 1) to High(Points) do
+    Result[2] := Result[2] + ' ' + FloatToStr(Points[i].X) + ' ' + FloatToStr(Points[i].Y);
+  Result[3] := IntToStr(FLineWidth);
+  Result[4] := GetEnumName(TypeInfo(TFPPenStyle),Ord(FLineStyle));
+  Result[5] := ColorToString(FLineColor);
+end;
+
+procedure TPolyLine.Load(AParameters: StrArr);
+var
+  i, NewPoint: integer;
+  p: String;
+begin
+  i := 1;
+  NewPoint := 0;
+  SetMaxBounds(Bounds);
+  while i <  Length(AParameters[0]) do begin
+    SetLength(Points, Length(Points) + 1);
+    p := StrToStrPoint(AParameters[0], i);
+    i += Length(p) + 1;
+    Points[NewPoint].X := StrToFloat(p);
+    p := StrToStrPoint(AParameters[0], i);
+    i += Length(p) + 1;
+    Points[NewPoint].Y := StrToFloat(p);
+    with Points[NewPoint] do
+      UpdateBounds(X, Y);
+    Inc(NewPoint);
+  end;
+  FLineWidth := StrToInt(AParameters[1]);
+  FLineStyle := TFPPenStyle(GetEnumValue(TypeInfo(TFPPenStyle), AParameters[2]));
+  FLineColor := StringToColor(AParameters[3]);
 end;
 
   { TLinesFigure }
 
 function TLinesFigure.Save: StrArr;
 begin
-  SetLength(Result, 5);
+  SetLength(Result, 6);
   Result[0] := ClassName;
+  Result[1] := IntToStr(Length(Result) - 1);
   with Bounds do
-  Result[1] := FloatToStr(Top) + ' ' +
-               FloatToStr(Left) + ' ' +
-               FloatToStr(Bottom) + ' ' +
-               FloatToStr(Right);
-  Result[2] := IntToStr(FLineWidth);
-  Result[3] := GetEnumName(TypeInfo(TFPPenStyle),ord(FLineStyle));
-  Result[4] := ColorToString(FLineColor);
+  Result[2] := FloatToStr(Min(Bounds.Top, Bounds.Bottom)) + ' ' +
+               FloatToStr(Min(Bounds.Left, Bounds.Right)) + ' ' +
+               FloatToStr(Max(Bounds.Top, Bounds.Bottom)) + ' ' +
+               FloatToStr(Max(Bounds.Left, Bounds.Right));
+  Result[3] := IntToStr(FLineWidth);
+  Result[4] := GetEnumName(TypeInfo(TFPPenStyle),ord(FLineStyle));
+  Result[5] := ColorToString(FLineColor);
+end;
+
+procedure TLinesFigure.Load(AParameters: StrArr);
+var
+  i: integer;
+  p: String;
+begin
+  i := 1;
+  while i <  Length(AParameters[0]) do begin
+    p := StrToStrPoint(AParameters[0], i);
+    i += Length(p) + 1;
+    Bounds.Top := StrToFloat(p);
+    p := StrToStrPoint(AParameters[0], i);
+    i += Length(p) + 1;
+    Bounds.Left := StrToFloat(p);
+    p := StrToStrPoint(AParameters[0], i);
+    i += Length(p) + 1;
+    Bounds.Bottom := StrToFloat(p);
+    p := StrToStrPoint(AParameters[0], i);
+    i += Length(p) + 1;
+    Bounds.Right := StrToFloat(p);
+    with Bounds do begin
+      UpdateBounds(Left, Top);
+      UpdateBounds(Right, Bottom);
+    end;
+  end;
+  FLineWidth := StrToInt(AParameters[1]);
+  FLineStyle := TFPPenStyle(GetEnumValue(TypeInfo(TFPPenStyle), AParameters[2]));
+  FLineColor := StringToColor(AParameters[3]);
 end;
 
   { TFilledFigure }
@@ -302,8 +398,16 @@ begin
   Inherited;
   Result := Inherited;
   SetLength(Result, Length(Result) + 2);
-  Result[High(Result) - 1] := GetEnumName(TypeInfo(TBrushStyle),ord(FBrushStyle));
+  Result[1]                := IntToStr(Length(Result) - 2);
+  Result[High(Result) - 1] := GetEnumName(TypeInfo(TBrushStyle),Ord(FBrushStyle));
   Result[High(Result)]     := ColorToString(FBrushColor);
+end;
+
+procedure TFilledFigures.Load(AParameters: StrArr);
+begin
+  Inherited;
+  FBrushStyle := TBrushStyle(GetEnumValue(TypeInfo(TBrushStyle), AParameters[4]));
+  FBrushColor := StringToColor(AParameters[5]);
 end;
 
   { TTwoPointsFigure }
@@ -345,6 +449,11 @@ function TTwoPointsFigure.Save: StrArr;
 begin
   Inherited;
   Result := Inherited;
+end;
+
+procedure TTwoPointsFigure.Load(AParameters: StrArr);
+begin
+  Inherited;
 end;
 
   { TRectangle }
@@ -452,8 +561,16 @@ begin
   Inherited;
   Result := Inherited;
   SetLength(Result, Length(Result) + 2);
+  Result[1] := IntToStr(Length(Result) - 2);
   Result[High(Result) - 1] := IntToStr(RadiusX);
   Result[High(Result)] := IntToStr(RadiusY);
+end;
+
+procedure TRoundRect.Load(AParameters: StrArr);
+begin
+  Inherited;
+  RadiusX := StrToInt(AParameters[High(AParameters) - 1]);
+  RadiusY := StrToInt(AParameters[High(AParameters)]);;
 end;
 
   { TEllipse }
@@ -548,15 +665,43 @@ end;
 
 function TLine.Save: StrArr;
 begin
-  SetLength(Result, 5);
+  SetLength(Result, 6);
   Result[0] := ClassName;
-  Result[1] := FloatToStr(Bounds.Top) + ' ' +
-               FloatToStr(Bounds.Left) + ' ' +
-               FloatToStr(Bounds.Bottom) + ' ' +
-               FloatToStr(Bounds.Right);
-  Result[2] := IntToStr(FLineWidth);
-  Result[3] := GetEnumName(TypeInfo(TFPPenStyle),ord(FLineStyle));
-  Result[4] := ColorToString(FLineColor);
+  Result[1] := IntToStr(Length(Result) - 2);
+  Result[2] := FloatToStr(Min(Bounds.Top, Bounds.Bottom)) + ' ' +
+               FloatToStr(Min(Bounds.Left, Bounds.Right)) + ' ' +
+               FloatToStr(Max(Bounds.Top, Bounds.Bottom)) + ' ' +
+               FloatToStr(Max(Bounds.Left, Bounds.Right));
+  Result[3] := IntToStr(FLineWidth);
+  Result[4] := GetEnumName(TypeInfo(TFPPenStyle),Ord(FLineStyle));
+  Result[5] := ColorToString(FLineColor);
+end;
+
+procedure TLine.Load(AParameters: StrArr);
+var
+  i: integer;
+  p: String;
+begin
+  i := 1;
+  p := StrToStrPoint(AParameters[0], i);
+  i += Length(p) + 1;
+  Bounds.Top := StrToFloat(p);
+  p := StrToStrPoint(AParameters[0], i);
+  i += Length(p) + 1;
+  Bounds.Left := StrToFloat(p);
+  p := StrToStrPoint(AParameters[0], i);
+  i += Length(p) + 1;
+  Bounds.Bottom := StrToFloat(p);
+  p := StrToStrPoint(AParameters[0], i);
+  i += Length(p) + 1;
+  Bounds.Right := StrToFloat(p);
+  with Bounds do begin
+    UpdateBounds(Left, Top);
+    UpdateBounds(Right, Bottom);
+  end;
+  FLineWidth := StrToInt(AParameters[1]);
+  FLineStyle := TFPPenStyle(GetEnumValue(TypeInfo(TFPPenStyle), AParameters[2]));
+  FLineColor := StringToColor(AParameters[3]);
 end;
 
   { TFrame }
@@ -639,8 +784,14 @@ function TPolygon.Save: StrArr;
 begin
 Inherited;
   Result := Inherited;
-  SetLength(Result, Length(Result) + 1);
+  Result[1] := IntToStr(Length(Result) - 2);
   Result[High(Result)] := IntToStr(NumberOfAngles);
+end;
+
+procedure TPolygon.Load(AParameters: StrArr);
+begin
+  Inherited;
+  NumberOfAngles := StrToInt(AParameters[High(AParameters)]);
 end;
 
 end.
