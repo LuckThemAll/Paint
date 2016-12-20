@@ -173,6 +173,23 @@ begin
   SetParametersPanel;
   ToolParameters.Visible := False;
   ImageName := 'Image1.pef';
+  UpdateFileName;
+end;
+
+procedure TMainScreen.UpdateScreenCoords;
+var
+  i: integer;
+  b: TDoubleRect;
+begin
+  for i := 0 to High(Figures) do begin
+    b := Figures[i].Bounds;
+    if i = 0 then
+      ImageCoords := b;
+    with b do begin
+      UpdateBorderCoords(Left, Top);
+      UpdateBorderCoords(Right, Bottom);
+    end;
+  end;
 end;
 
   { Btn }
@@ -309,18 +326,9 @@ begin
   if CurrentTool.GetFigure <> nil then begin
     CurrentTool.GetFigure.Draw(PaintBox.Canvas);
     UFigures.SaveActualFigure(CurrentTool.GetFigure);
+    FileWasChanged := True;
   end;
-  for i := 0 to High(Figures) do begin
-      b := Figures[i].Bounds;
-      if i = 0 then
-        ImageCoords := b;
-      with b do begin
-        UpdateBorderCoords(Left, Top);
-        UpdateBorderCoords(Right, Bottom);
-      end;
-  end;
-  if FileWasChanged then
-    UpdateFileName;
+  UpdateScreenCoords;
   MainScreen.Invalidate;
 end;
 

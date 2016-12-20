@@ -234,7 +234,7 @@ var
   ToolRegistry: array of TTool;
   CurrentTool: TTool;
   InvalidateHandler: procedure of Object;
-  FileWasChanged, FileWasSaved: boolean;
+  FileWasChanged: boolean;
 
 implementation
 
@@ -731,7 +731,6 @@ end;
 
 procedure TPolyLineTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
-  FileWasChanged := True;
   UnselectAll;
   if FLineWidth = 0 then FLineWidth := 1;
   Figure := TPolyline.Create(APenColor, FLineStyle, FLineWidth);
@@ -777,7 +776,6 @@ end;
 
 procedure TRectangleTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
-  FileWasChanged := True;
   UnselectAll;
   if FLineWidth = 0 then FLineWidth := 1;
   Figure := TRectangle.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle);
@@ -819,7 +817,6 @@ end;
 
 procedure TPolygonTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
-  FileWasChanged := True;
   UnselectAll;
   if FLineWidth = 0 then FLineWidth := 1;
   Figure := TPolygon.Create(APenColor, ABrushColor, FLineStyle, FLineWidth,
@@ -864,7 +861,6 @@ end;
 
 procedure TEllipseTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
-  FileWasChanged := True;
   UnselectAll;
   if FLineWidth = 0 then FLineWidth := 1;
   Figure := TEllipse.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle);
@@ -905,7 +901,6 @@ end;
 
 procedure TLineTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
-  FileWasChanged := True;
   UnselectAll;
   if FLineWidth = 0 then FLineWidth := 1;
   Figure := TLine.Create(APenColor, FLineStyle, FLineWidth);
@@ -947,7 +942,6 @@ end;
 
 procedure TRoundRectTool.MouseDown(X, Y: Integer; APenColor, ABrushColor: TColor);
 begin
-  FileWasChanged := True;
   UnselectAll;
   if FLineWidth = 0 then FLineWidth := 1;
   Figure := TRoundRect.Create(APenColor, ABrushColor, FLineStyle, FLineWidth, FBrushStyle,
