@@ -215,8 +215,21 @@ begin
 end;
 
 procedure TMainScreen.ExitBtnClick(Sender: TObject);
+var
+  IntMessageDialog: integer;
 begin
-  Application.Terminate;
+  If MainScreen.Caption[1] = '*' then begin
+    IntMessageDialog := MessageDLG('Save the current Image?', mtConfirmation, [mbYes,mbNo],0);
+    case IntMessageDialog of
+      mrYes: begin
+        SaveAsBtnClick(TObject.Create);
+        Application.Terminate;
+      end;
+      mrNo: Application.Terminate;
+    end;
+  end
+  else
+    Application.Terminate;
 end;
 
 procedure TMainScreen.AboutBtnClick(Sender: TObject);
