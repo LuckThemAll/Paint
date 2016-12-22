@@ -106,6 +106,8 @@ end;
     constructor Create(APenColor: TColor; APenStyle: TFPPenStyle; AWidth: integer);
     procedure Draw(Canvas: TCanvas); override;
     procedure Load(AParameters: StrArr); override;
+    procedure DrawSelectFrame(ABounds: TDoubleRect; ACanvas: TCanvas); override;
+    function GetBounds: TDoubleRect; override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function IsPointInside(ABounds: TDoubleRect): Boolean; override;
     function Save: StrArr; override;
@@ -648,10 +650,10 @@ var
   Delta: integer = 2;
 begin
   Result := false;
-  B.Left   := min(ABounds.Left, ABounds.Right) - Delta;
-  B.Top    := min(ABounds.Top, ABounds.Bottom) - Delta;
-  B.Right  := min(ABounds.Left, ABounds.Right) + Delta;
-  B.Bottom := min(ABounds.Top, ABounds.Bottom) + Delta;
+  B.Left   := ABounds.Left - Delta;
+  B.Top    := ABounds.Top - Delta;
+  B.Right  := ABounds.Right + Delta;
+  B.Bottom := ABounds.Bottom + Delta;
  if IsRectIntersectSegment(GetBounds.TopLeft, GetBounds.BottomRight, B) then
    Result := true;
 end;
@@ -661,6 +663,34 @@ begin
   Result := false;
  if IsRectIntersectSegment(Bounds.TopLeft, Bounds.BottomRight, ABounds) then
    Result := true;
+end;
+
+procedure TLine.DrawSelectFrame(ABounds: TDoubleRect; ACanvas: TCanvas);
+var
+  Delta: integer = 7;
+begin
+  ACanvas.Pen.Color := clBlack;
+  ACanvas.Pen.Width := 1;
+  ACanvas.Pen.Style := psDash;
+  if abs(ABounds.Top - ABounds.Bottom) <= 4 then begin
+    ABounds.Top -= Delta;
+    ABounds.Bottom += Delta;
+  end;
+  if abs(ABounds.Left - ABounds.Right) <= 4 then begin
+    ABounds.Left -= Delta;
+    ABounds.Right += Delta;
+  end;
+  ACanvas.Frame(WorldToScreen(ABounds));
+end;
+
+function TLine.GetBounds: TDoubleRect;
+begin
+ with Result do begin
+   Top    := Bounds.Top;
+   Left   := Bounds.Left;
+   Bottom := Bounds.Bottom;
+   Right  := Bounds.Right;
+ end;
 end;
 
 function TLine.Save: StrArr;

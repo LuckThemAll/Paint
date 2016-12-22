@@ -204,6 +204,8 @@ begin
     SetParametersPanel;
     CurrentTool.Init(ToolParameters);
     ToolParameters.Visible := CurrentTool.ParametersAvailable;
+    if not (CurrentTool is THandTool) then
+      CurrentTool.UnselectAll;
     MainScreen.Invalidate;
 end;
 
