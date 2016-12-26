@@ -208,6 +208,19 @@ object MainScreen: TMainScreen
         OnClick = AboutBtnClick
       end
     end
+    object MenuItem2: TMenuItem
+      Caption = 'Correction'
+      object UndoBtn: TMenuItem
+        Caption = 'Undo'
+        ShortCut = 16474
+        OnClick = UndoBtnClick
+      end
+      object RedoBtn: TMenuItem
+        Caption = 'Redo'
+        ShortCut = 24666
+        OnClick = RedoBtnClick
+      end
+    end
   end
   object ColorDialog: TColorDialog
     Color = clBlack

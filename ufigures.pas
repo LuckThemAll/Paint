@@ -30,6 +30,8 @@ Type
     function Save: StrArr; virtual; abstract;
   end;
 
+  ArrayOfTFigure = array of TFigure;
+
   TLinesFigure = class(TFigure)
   public
     FLineStyle: TFPPenStyle;
@@ -131,10 +133,13 @@ end;
     function Save: StrArr; override;
   end;
 
+
+  function SaveToStrArr: StrArr;
+
 procedure SaveActualFigure(Figure: TFigure);
 
 var
-  Figures: array of TFigure;
+  Figures: ArrayOfTFigure;
 
 implementation
 
@@ -216,6 +221,19 @@ begin
     Bounds.Right := AX;
   if Bounds.Bottom < AY then
     Bounds.Bottom := AY;
+end;
+
+function SaveToStrArr: StrArr;
+var
+  i, j: Integer;
+begin
+  SetLength(Result, 1);
+  Result[0] := IntToStr(Length(Figures));
+  for i := Low(Figures) to High(Figures) do begin
+    SetLength(Result, Length(Result) + Length(Figures[i].Save));
+    for j := low((Figures[i]).Save) to high((Figures[i]).Save) do
+      Result[High(Result) - high((Figures[i]).Save)+ j] := Figures[i].Save[j];
+  end;
 end;
 
   { PolyLine }

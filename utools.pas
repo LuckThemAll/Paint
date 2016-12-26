@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, UFigures, Graphics, UScale, math, ExtCtrls, Spin, StdCtrls,
-   FPCanvas, Controls;
+   FPCanvas, Controls, UHistory;
 type
 
   TFigureClass = class of TFigure;
@@ -268,12 +268,14 @@ var
 begin
   if not (CurrentTool is TSelectTool) then
   (CurrentTool as TLinesTool).FLineWidth := (Sender as TSpinEdit).Value
-  else
-      for i := 0 to High(Figures) do
+  else begin
+      for i := 0 to High(Figures) - 1 do
         if Figures[i].Selected then begin
           (Figures[i] as TLinesFigure).FLineWidth := (Sender as TSpinEdit).Value;
           FileWasChanged := True;
         end;
+      History.AddToBufer;
+  end;
   InvalidateHandler;
 end;
 
@@ -329,12 +331,14 @@ var
 begin
   if not (CurrentTool is TSelectTool) then
   (CurrentTool as TLinesTool).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex)
-  else
-      for i := 0 to High(Figures) do
-        if Figures[i].Selected then begin
-          (Figures[i] as TLinesFigure).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex);
-          FileWasChanged := True;
-        end;
+  else begin
+    for i := 0 to High(Figures) do
+      if Figures[i].Selected then begin
+        (Figures[i] as TLinesFigure).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex);
+        FileWasChanged := True;
+      end;
+    History.AddToBufer;
+  end;
   InvalidateHandler;
 end;
 
@@ -389,12 +393,14 @@ var
 begin
   if not (CurrentTool is TSelectTool) then
     (CurrentTool as TFilledTool).FBrushStyle := TFPBrushStyle((Sender as TComboBox).ItemIndex)
-  else
+  else begin
     for i := Low(Figures) to High(Figures) do
       if Figures[i].Selected then begin
         (Figures[i] as TFilledFigures).FBrushStyle := TFPBrushStyle((Sender as TComboBox).ItemIndex);
         FileWasChanged := True;
       end;
+    History.AddToBufer;
+  end;
   InvalidateHandler;
 end;
 
@@ -420,12 +426,14 @@ var
 begin
   if not (CurrentTool is TSelectTool) then
     (CurrentTool as TPolygonTool).FNumberOfAngles := (Sender as TSpinEdit).Value
-  else
+  else begin
     for i := Low(Figures) to High(Figures) do
       if Figures[i].Selected then begin
         (Figures[i] as TPolygon).NumberOfAngles := (Sender as TSpinEdit).Value;
         FileWasChanged := True;
       end;
+    History.AddToBufer;
+  end;
   InvalidateHandler;
 end;
 
@@ -451,12 +459,14 @@ var
 begin
   if not (CurrentTool is TSelectTool) then
       (CurrentTool as TRoundRectTool).RadiusX := (Sender as TSpinEdit).Value
-    else
+    else begin
       for i := Low(Figures) to High(Figures) do
         if Figures[i].Selected then begin
           (Figures[i] as TRoundRect).RadiusX := (Sender as TSpinEdit).Value;
           FileWasChanged := True;
         end;
+      History.AddToBufer;
+    end;
   InvalidateHandler;
 end;
 
@@ -482,12 +492,14 @@ var
 begin
   if not (CurrentTool is TSelectTool) then
       (CurrentTool as TRoundRectTool).RadiusY := (Sender as TSpinEdit).Value
-    else
+    else begin
       for i := Low(Figures) to High(Figures) do
         if Figures[i].Selected then begin
           (Figures[i] as TRoundRect).RadiusY := (Sender as TSpinEdit).Value;
           FileWasChanged := True;
         end;
+      History.AddToBufer;
+    end;
   InvalidateHandler;
 end;
 

@@ -33,7 +33,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="7">
+    <Units Count="8">
       <Unit0>
         <Filename Value="PaintEmulator.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -74,6 +74,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="UParameters"/>
       </Unit6>
+      <Unit7>
+        <Filename Value="uhistory.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UHistory"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

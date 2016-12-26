@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Menus, ComCtrls, StdCtrls, Buttons, Grids, PairSplitter, Spin, AboutForm,
-  UFigures, UTools, math, LCLType, UScale, Types;
+  UFigures, UTools, math, LCLType, UScale, Types, UHistory;
 
 type
 
@@ -20,6 +20,9 @@ type
     BrushColorPanel: TPanel;
     BlackSquare: TPanel;
     FullExtent: TMenuItem;
+    MenuItem2: TMenuItem;
+    UndoBtn: TMenuItem;
+    RedoBtn: TMenuItem;
     OpenBtn: TMenuItem;
     SaveAsBtn: TMenuItem;
     Save: TMenuItem;
@@ -50,6 +53,8 @@ type
     procedure AboutBtnClick(Sender: TObject);
     procedure FormPaint(Sender: TObject);
     procedure FullExtentClick(Sender: TObject);
+    procedure UndoBtnClick(Sender: TObject);
+    procedure RedoBtnClick(Sender: TObject);
     procedure OpenBtnClick(Sender: TObject);
     procedure PaintBoxMouseEnter(Sender: TObject);
     procedure PaintBoxMouseLeave(Sender: TObject);
@@ -243,6 +248,8 @@ begin
     MainScreen.Height := 700;
   if (MainScreen.Width < 300) then
     MainScreen.Width  := 300;
+  UndoBtn.Enabled := False;
+  RedoBtn.Enabled := False;
 end;
 
 procedure TMainScreen.FullExtentClick(Sender: TObject);
@@ -269,6 +276,20 @@ begin
     Crutch;
 end;
 
+procedure TMainScreen.UndoBtnClick(Sender: TObject);
+begin
+  History.Undo;
+  UndoBtn.Enabled := (History.AvaibleUndo >= 1);
+  PaintBox.Invalidate;
+end;
+
+procedure TMainScreen.RedoBtnClick(Sender: TObject);
+begin
+  History.Redo;
+  RedoBtn.Enabled := (History.AvaibleRedo >= 1);
+  PaintBox.Invalidate;
+end;
+
   { DrawGrid }
 
 procedure TMainScreen.DrawGridPrepareCanvas(sender: TObject; aCol,
@@ -286,18 +307,22 @@ begin
   if Button = mbLeft then begin
     PenColor := Colors[aCol][aRow];
     PenColorPanel.Color := PenColor;
-    if CurrentTool is TSelectTool then;
+    if CurrentTool is TSelectTool then begin
       for i := Low(Figures) to High(Figures) do
         if Figures[i].Selected then
           Figures[i].FLineColor := PenColorPanel.Color;
+      History.AddToBufer;
+    end;
   end;
   if Button = mbRight then begin
     BrushColor := Colors[aCol][aRow];
     BrushColorPanel.Color := BrushColor;
-    if CurrentTool is TSelectTool then;
+    if CurrentTool is TSelectTool then begin
       for i := Low(Figures) to High(Figures) do
         if Figures[i].Selected then
           Figures[i].FBrushColor := BrushColorPanel.Color;
+      History.AddToBufer;
+    end;
   end;
   Invalidate;
 end;
@@ -342,6 +367,7 @@ begin
     CurrentTool.GetFigure.Draw(PaintBox.Canvas);
     UFigures.SaveActualFigure(CurrentTool.GetFigure);
     FileWasChanged := True;
+    History.AddToBufer;
   end;
   UpdateScreenCoords;
   MainScreen.Invalidate;
@@ -363,8 +389,9 @@ begin
   UScale.SetCoordsForBars(CanvasCoords, ImageCoords);
   if MouseOnPaintBox then
     SetScrollBarsParameters(CanvasCoords);
-  if FileWasChanged then
+  if FileWasChanged then begin
     UpdateFileName;
+  end;
 end;
 
 procedure TMainScreen.SetScrollBarsParameters(ARect: TDoubleRect);
@@ -496,12 +523,8 @@ begin
   DeleteFile(AFileName);
   Rewrite(f);
   WriteLn(f, Signature);
-  WriteLn(f, length(Figures));
-  for i := Low(Figures) to High(Figures) do
-  begin
-    for j := low((Figures[i]).Save) to high((Figures[i]).Save) do
-      WriteLn(f,(Figures[i]).Save[j]);
-  end;
+  for i := 0 to High(SaveToStrArr) do
+    WriteLn(f, SaveToStrArr[i]);
   CloseFile(f);
   ImageName := AFileName;
   LastSavedFileName := AFileName;
@@ -567,6 +590,7 @@ begin
     MainScreen.Caption := '*' + MainScreen.Caption;
     FileWasChanged := False;
   end;
+  Invalidate;
 end;
 
 
