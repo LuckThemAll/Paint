@@ -233,7 +233,6 @@ type
 var
   ToolRegistry: array of TTool;
   CurrentTool: TTool;
-  InvalidateHandler: procedure of Object;
   FileWasChanged: boolean;
 
 implementation
@@ -725,7 +724,6 @@ end;
 
 procedure THandTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer; Shift: TShiftState);
 begin
-  //Nothing
 end;
 
 procedure THandTool.InitParameters;

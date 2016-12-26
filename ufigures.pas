@@ -205,10 +205,10 @@ end;
 
 procedure TFigure.SetMaxBounds(ABounds: TDoubleRect);
 begin
-  ABounds.Top    := MaxInt;
-  ABounds.Left   := MaxInt;
-  ABounds.Bottom := -MaxInt;
-  ABounds.Right  := -MaxInt;
+  Bounds.Top    := MaxInt;
+  Bounds.Left   := MaxInt;
+  Bounds.Bottom := -MaxInt;
+  Bounds.Right  := -MaxInt;
 end;
 
 procedure TFigure.UpdateBounds(AX, AY: Double);
@@ -348,6 +348,7 @@ begin
   i := 1;
   NewPoint := 0;
   SetMaxBounds(Bounds);
+  AParameters[0] += ' ';
   while i <  Length(AParameters[0]) do begin
     SetLength(Points, Length(Points) + 1);
     p := StrToStrPoint(AParameters[0], i);
