@@ -1,13 +1,14 @@
 object MainScreen: TMainScreen
-  Left = 1102
+  Left = 718
   Height = 649
-  Top = 235
+  Top = 34
   Width = 704
   Caption = 'MainScreen'
   ClientHeight = 629
   ClientWidth = 704
   Color = clWhite
   Menu = MainMenu
+  OnClose = FormClose
   OnCreate = FormCreate
   OnPaint = FormPaint
   LCLVersion = '1.6.0.4'
@@ -208,8 +209,8 @@ object MainScreen: TMainScreen
         OnClick = AboutBtnClick
       end
     end
-    object MenuItem2: TMenuItem
-      Caption = 'Correction'
+    object EditMenu: TMenuItem
+      Caption = 'Edit'
       object UndoBtn: TMenuItem
         Caption = 'Undo'
         ShortCut = 16474

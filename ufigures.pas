@@ -274,18 +274,18 @@ begin
   Canvas.Polyline(WorldPointsToScreen(Points));
 end;
 
-function TPolyLine.IsPointInside(ABounds: TDoubleRect): Boolean;
+function TPolyLine.IsPointInside(ADoublePoint: TDoublePoint): Boolean;
 var
   i: integer;
   A: array of TPoint;
+  B: TPoint;
   DistanceMouseToPoint: integer;
-  B: TRect;
 begin
   Result := False;
   A := WorldPointsToScreen(Points);
-  B := WorldToScreen(ABounds);
+  B := WorldToScreen(ADoublePoint);
   for i := Low(A) to High(A) do begin
-    DistanceMouseToPoint := round(sqrt((A[i].X - B.Left)**2 + (A[i].Y - B.Top)**2));
+    DistanceMouseToPoint := round(sqrt((A[i].X - B.X)**2 + (A[i].Y - B.Y)**2));
     if DistanceMouseToPoint <= ((FLineWidth div 2) + 1) then begin
       Result := true;
       Break;
@@ -521,7 +521,7 @@ begin
   with WorldToScreen(GetBounds) do begin
     Rect := CreateRectRgn(Left, Top, Right, Bottom);
   end;
-  Point := WorldToScreen(DoublePoint(ABounds.Left, ABounds.Top));
+  Point := WorldToScreen(ADoublePoint);
   Result := PtInRegion(Rect, Point.X, Point.Y);
   DeleteObject(Rect);
 end;

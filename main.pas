@@ -20,7 +20,7 @@ type
     BrushColorPanel: TPanel;
     BlackSquare: TPanel;
     FullExtent: TMenuItem;
-    MenuItem2: TMenuItem;
+    EditMenu: TMenuItem;
     UndoBtn: TMenuItem;
     RedoBtn: TMenuItem;
     OpenBtn: TMenuItem;
@@ -48,6 +48,7 @@ type
     procedure DrawGridPrepareCanvas(sender: TObject; aCol, aRow: Integer;
       aState: TGridDrawState);
     procedure DrawGridVisibleClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure ExitBtnClick(Sender: TObject);
     procedure AboutBtnClick(Sender: TObject);
@@ -179,6 +180,8 @@ begin
   ToolParameters.Visible := False;
   ImageName := 'Image1.pef';
   UpdateFileName;
+  UndoBtn.Enabled := False;
+  RedoBtn.Enabled := False;
 end;
 
 procedure TMainScreen.UpdateScreenCoords;
@@ -219,6 +222,24 @@ begin
   DrawGrid.Visible := not DrawGrid.Visible;
 end;
 
+procedure TMainScreen.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+var
+  IntMessageDialog: integer;
+begin
+  If MainScreen.Caption[1] = '*' then begin
+    IntMessageDialog := MessageDLG('Save the current Image?', mtConfirmation, [mbYes,mbNo],0);
+    case IntMessageDialog of
+      mrYes: begin
+        SaveAsBtnClick(TObject.Create);
+        Application.Terminate;
+      end;
+      mrNo: Application.Terminate;
+    end;
+  end
+  else
+    Application.Terminate;
+end;
+
 procedure TMainScreen.ExitBtnClick(Sender: TObject);
 var
   IntMessageDialog: integer;
@@ -248,8 +269,6 @@ begin
     MainScreen.Height := 700;
   if (MainScreen.Width < 300) then
     MainScreen.Width  := 300;
-  UndoBtn.Enabled := False;
-  RedoBtn.Enabled := False;
 end;
 
 procedure TMainScreen.FullExtentClick(Sender: TObject);
@@ -279,14 +298,12 @@ end;
 procedure TMainScreen.UndoBtnClick(Sender: TObject);
 begin
   History.Undo;
-  UndoBtn.Enabled := (History.AvaibleUndo >= 1);
   PaintBox.Invalidate;
 end;
 
 procedure TMainScreen.RedoBtnClick(Sender: TObject);
 begin
   History.Redo;
-  RedoBtn.Enabled := (History.AvaibleRedo >= 1);
   PaintBox.Invalidate;
 end;
 
@@ -311,7 +328,7 @@ begin
       for i := Low(Figures) to High(Figures) do
         if Figures[i].Selected then
           Figures[i].FLineColor := PenColorPanel.Color;
-      History.AddToBufer;
+      History.SaveHistory;
     end;
   end;
   if Button = mbRight then begin
@@ -321,7 +338,7 @@ begin
       for i := Low(Figures) to High(Figures) do
         if Figures[i].Selected then
           Figures[i].FBrushColor := BrushColorPanel.Color;
-      History.AddToBufer;
+      History.SaveHistory;
     end;
   end;
   Invalidate;
@@ -367,10 +384,13 @@ begin
     CurrentTool.GetFigure.Draw(PaintBox.Canvas);
     UFigures.SaveActualFigure(CurrentTool.GetFigure);
     FileWasChanged := True;
-    History.AddToBufer;
+    History.SaveHistory;
   end;
   UpdateScreenCoords;
-  MainScreen.Invalidate;
+  if FileWasChanged then
+    UpdateFileName;
+  with History do
+     UndoBtn.Enabled := AvailableUndo > 0;
 end;
 
 procedure TMainScreen.PaintBoxPaint(Sender: TObject);
@@ -389,9 +409,10 @@ begin
   UScale.SetCoordsForBars(CanvasCoords, ImageCoords);
   if MouseOnPaintBox then
     SetScrollBarsParameters(CanvasCoords);
-  if FileWasChanged then begin
+  if FileWasChanged then
     UpdateFileName;
-  end;
+  UndoBtn.Enabled := History.UndoBtnAvailable;
+  RedoBtn.Enabled := History.RedoBtnAvailable;
 end;
 
 procedure TMainScreen.SetScrollBarsParameters(ARect: TDoubleRect);
@@ -547,8 +568,9 @@ begin
     Title      := 'Open a Paint Emulator Format';
     DefaultExt := 'pef';
   end;
-  LastSavedFileName := OpenImageDialog.FileName;
   if OpenImageDialog.Execute then begin
+    LastSavedFileName := OpenImageDialog.FileName;
+    ImageName := OpenImageDialog.FileName;
     AssignFile(f, OpenImageDialog.FileName);
     Reset(f);
     ReadLn(f, FileSignature);
@@ -578,6 +600,8 @@ begin
     CloseFile(f);
     SetScreenCoords(0, 0);
     UpdateScreenCoords;
+    FileWasChanged := False;
+    UpdateFileName;
     SetCoordsForBars(CanvasCoords, ImageCoords);
     MainScreen.Invalidate;
   end;

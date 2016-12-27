@@ -329,14 +329,14 @@ var
   i: integer;
 begin
   if not (CurrentTool is TSelectTool) then
-  (CurrentTool as TLinesTool).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex)
+    (CurrentTool as TLinesTool).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex)
   else begin
-    for i := 0 to High(Figures) do
+    for i := Low(Figures) to High(Figures) do
       if Figures[i].Selected then begin
         (Figures[i] as TLinesFigure).FLineStyle := TFPPenStyle((Sender as TComboBox).ItemIndex);
         FileWasChanged := True;
       end;
-    History.AddToBufer;
+    History.SaveHistory;
   end;
   InvalidateHandler;
 end;
@@ -398,7 +398,7 @@ begin
         (Figures[i] as TFilledFigures).FBrushStyle := TFPBrushStyle((Sender as TComboBox).ItemIndex);
         FileWasChanged := True;
       end;
-    History.AddToBufer;
+    History.SaveHistory;
   end;
   InvalidateHandler;
 end;
@@ -431,7 +431,7 @@ begin
         (Figures[i] as TPolygon).NumberOfAngles := (Sender as TSpinEdit).Value;
         FileWasChanged := True;
       end;
-    History.AddToBufer;
+    History.SaveHistory;
   end;
   InvalidateHandler;
 end;
@@ -464,7 +464,7 @@ begin
           (Figures[i] as TRoundRect).RadiusX := (Sender as TSpinEdit).Value;
           FileWasChanged := True;
         end;
-      History.AddToBufer;
+      History.SaveHistory;
     end;
   InvalidateHandler;
 end;
@@ -490,14 +490,14 @@ var
   i: integer;
 begin
   if not (CurrentTool is TSelectTool) then
-      (CurrentTool as TRoundRectTool).RadiusY := (Sender as TSpinEdit).Value
+    (CurrentTool as TRoundRectTool).RadiusY := (Sender as TSpinEdit).Value
     else begin
       for i := Low(Figures) to High(Figures) do
         if Figures[i].Selected then begin
           (Figures[i] as TRoundRect).RadiusY := (Sender as TSpinEdit).Value;
           FileWasChanged := True;
         end;
-      History.AddToBufer;
+      History.SaveHistory;
     end;
   InvalidateHandler;
 end;
@@ -723,7 +723,14 @@ begin
 end;
 
 procedure THandTool.MouseUp(X, Y: integer; AWidth, AHeight: Integer; Shift: TShiftState);
+var
+  i: Integer;
 begin
+  for i := Low(Figures) to High(Figures) do
+    if Figures[i].Selected then begin
+      History.SaveHistory;
+      Break;
+    end;
 end;
 
 procedure THandTool.InitParameters;
