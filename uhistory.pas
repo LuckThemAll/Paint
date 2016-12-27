@@ -20,6 +20,7 @@ type
     UndoBtnAvailable, RedoBtnAvailable: Boolean;
     function NextPointer(APointer, ABufferLength: integer): integer;
     function PreviousPointer(APointer, ABufferLength: integer): integer;
+    procedure SetInitialBufer;
     procedure SetEnableBtns;
     procedure SaveHistory;
     procedure Undo;
@@ -48,6 +49,19 @@ begin
     True  : Result := APointer - 1;
     False : Result := ABufferLength;
   end;
+end;
+
+procedure THistory.SetInitialBufer;
+var
+  i: Integer;
+begin
+  FPointer := 0;
+  for i := 1 to BufferLength do
+    HistoryBuffer[i] := Nil;
+  AvailableRedo := 0;
+  AvailableUndo := 0;
+  UndoBtnAvailable := False;
+  RedoBtnAvailable := False;
 end;
 
 procedure THistory.SetEnableBtns;

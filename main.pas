@@ -600,6 +600,8 @@ begin
     CloseFile(f);
     SetScreenCoords(0, 0);
     UpdateScreenCoords;
+    History.SetInitialBufer;
+    History.SaveHistory;
     FileWasChanged := False;
     UpdateFileName;
     SetCoordsForBars(CanvasCoords, ImageCoords);
