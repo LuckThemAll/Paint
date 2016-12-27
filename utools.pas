@@ -266,14 +266,14 @@ var
   i: integer;
 begin
   if not (CurrentTool is TSelectTool) then
-  (CurrentTool as TLinesTool).FLineWidth := (Sender as TSpinEdit).Value
+    (CurrentTool as TLinesTool).FLineWidth := (Sender as TSpinEdit).Value
   else begin
-      for i := 0 to High(Figures) - 1 do
-        if Figures[i].Selected then begin
-          (Figures[i] as TLinesFigure).FLineWidth := (Sender as TSpinEdit).Value;
-          FileWasChanged := True;
-        end;
-      History.AddToBufer;
+    for i := 0 to High(Figures) do
+      if Figures[i].Selected then begin
+        (Figures[i] as TLinesFigure).FLineWidth := (Sender as TSpinEdit).Value;
+        FileWasChanged := True;
+      end;
+    History.SaveHistory;
   end;
   InvalidateHandler;
 end;
@@ -1022,7 +1022,7 @@ procedure TSelectTool.MouseUp(X, Y: Integer; AWidth, AHeight: Integer;
 function isFigureSelected(k: integer):Boolean;
 begin
   Result := Figures[k].IsIntersect(DoubleRect(FFirstPoint, FSecondPoint)) or
-            Figures[k].IsPointInside(DoubleRect(FFirstPoint, FSecondPoint))
+            Figures[k].IsPointInside(FFirstPoint)
 end;
 
 procedure SelectFigure(k: integer);
@@ -1051,6 +1051,7 @@ begin
   Figure := nil;
   ParameterEditors := CrossParameters;
   ShowParameters;
+  InvalidateHandler;
 end;
 
 procedure TSelectTool.InitParameters;

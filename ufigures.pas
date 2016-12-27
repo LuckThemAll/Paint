@@ -24,10 +24,11 @@ Type
     procedure Load(AParameters: StrArr); virtual; abstract;
     procedure SetMaxBounds(ABounds: TDoubleRect);
     procedure UpdateBounds(AX, AY: Double);virtual;
-    function IsPointInside(ABounds: TDoubleRect): Boolean; virtual; abstract;
+    function IsPointInside(ADoublePoint: TDoublePoint): Boolean; virtual; abstract;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   virtual; abstract;
     function AreSegmentsIntersect(A1, A2, B1, B2: TDoublePoint): Boolean;
     function Save: StrArr; virtual; abstract;
+    function Copy: TFigure; virtual;
   end;
 
   ArrayOfTFigure = array of TFigure;
@@ -38,6 +39,7 @@ Type
     FLineWidth: Integer;
     procedure Load(AParameters: StrArr); override;
     function Save: StrArr; override;
+    function Copy: TFigure; override;
   end;
 
   TPolyLine = class(TLinesFigure)
@@ -48,16 +50,18 @@ Type
     procedure Draw(Canvas: TCanvas); override;
     procedure Move(ADoublePoint: TDoublePoint); override;
     procedure Load(AParameters: StrArr); override;
-    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function IsPointInside(ADoublePoint: TDoublePoint): Boolean; override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
     function Save: StrArr; override;
-end;
+    function Copy: TFigure; override;
+  end;
 
   TFilledFigures = class(TLinesFigure)
   public
     FBrushStyle: TFPBrushStyle;
     procedure Load(AParameters: StrArr); override;
     function Save: StrArr; override;
+    function Copy: TFigure; override;
   end;
 
   { TTwoPointsFigure }
@@ -71,6 +75,7 @@ end;
     function IsRectIntersectSegment(AFirstpoint, ASecondpoint: TDoublePoint;
       ARect: TDoubleRect): Boolean;
     function Save: StrArr; override;
+    function Copy: TFigure; override;
   end;
 
   TRectangle = class(TTwoPointsFigure)
@@ -78,7 +83,7 @@ end;
     constructor Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
       AWidth: integer; ABrushStyle: TFPBrushStyle);
     procedure Draw(Canvas: TCanvas); override;
-    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function IsPointInside(ADoublePoint: TDoublePoint): Boolean; override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
   end;
 
@@ -90,8 +95,9 @@ end;
     procedure Draw(Canvas: TCanvas); override;
     procedure Load(AParameters: StrArr); override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
-    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function IsPointInside(ADoublePoint: TDoublePoint): Boolean; override;
     function Save: StrArr; override;
+    function Copy: TFigure; override;
   end;
 
   TEllipse = class(TTwoPointsFigure)
@@ -100,7 +106,7 @@ end;
       AWidth: integer; ABrushStyle: TFPBrushStyle);
     procedure Draw(Canvas: TCanvas); override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
-    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function IsPointInside(ADoublePoint: TDoublePoint): Boolean; override;
   end;
 
   TLine = class(TTwoPointsFigure)
@@ -111,8 +117,9 @@ end;
     procedure DrawSelectFrame(ABounds: TDoubleRect; ACanvas: TCanvas); override;
     function GetBounds: TDoubleRect; override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
-    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function IsPointInside(ADoublePoint: TDoublePoint): Boolean; override;
     function Save: StrArr; override;
+    function Copy: TFigure; override;
   end;
 
   TFrame = class(TTwoPointsFigure)
@@ -129,8 +136,9 @@ end;
     procedure Draw(Canvas: TCanvas); override;
     procedure Load(AParameters: StrArr); override;
     function IsIntersect(ABounds: TDoubleRect): Boolean;   override;
-    function IsPointInside(ABounds: TDoubleRect): Boolean; override;
+    function IsPointInside(ADoublePoint: TDoublePoint): Boolean; override;
     function Save: StrArr; override;
+    function Copy: TFigure; override;
   end;
 
 
@@ -233,6 +241,18 @@ begin
     SetLength(Result, Length(Result) + Length(Figures[i].Save));
     for j := low((Figures[i]).Save) to high((Figures[i]).Save) do
       Result[High(Result) - high((Figures[i]).Save)+ j] := Figures[i].Save[j];
+  end;
+end;
+
+function TFigure.Copy: TFigure;
+begin
+  case Self.ClassName of
+   'TPolyLine' : Result := TPolyLine.Create(clBlack, psSolid, 1);
+   'TLine'     : Result := TLine.Create(clBlack, psSolid, 1);
+   'TRectangle': Result := TRectangle.Create(clBlack, clBlack, psSolid, 1, bsSolid);
+   'TEllipse'  : Result := TEllipse.Create(clBlack, clBlack, psSolid, 1, bsSolid);
+   'TRoundRect': Result := TRoundRect.Create(clBlack, clBlack, psSolid, 1, bsSolid, 0, 0);
+   'TPolygon'  : Result := TPolygon.Create(clBlack, clBlack, psSolid, 1, bsSolid, 3);
   end;
 end;
 
@@ -366,6 +386,23 @@ begin
   FLineColor := StringToColor(AParameters[3]);
 end;
 
+function TPolyLine.Copy: TFigure;
+var
+  i: integer;
+begin
+  Result := Inherited;
+  SetLength((Result as TPolyLine).Points, Length(Self.Points));
+  for i := 0 to High(Self.Points) do
+    (Result as TPolyLine).Points[i] := Self.Points[i];
+  Result.Bounds.Top := Self.Bounds.Top;
+  Result.Bounds.Left := Self.Bounds.Left;
+  Result.Bounds.Bottom := Self.Bounds.Bottom;
+  Result.Bounds.Right := Self.Bounds.Right;
+  (Result as TLinesFigure).FLineWidth := Self.FLineWidth;
+  (Result as TLinesFigure).FLineStyle := Self.FLineStyle;
+  (Result as TLinesFigure).FLineColor := Self.FLineColor;
+end;
+
   { TLinesFigure }
 
 function TLinesFigure.Save: StrArr;
@@ -412,6 +449,21 @@ begin
   FLineColor := StringToColor(AParameters[3]);
 end;
 
+function TLinesFigure.Copy: TFigure;
+var
+  i: integer;
+begin
+  Inherited;
+  Result := Inherited;
+  Result.Bounds.Top := Self.Bounds.Top;
+  Result.Bounds.Left := Self.Bounds.Left;
+  Result.Bounds.Bottom := Self.Bounds.Bottom;
+  Result.Bounds.Right := Self.Bounds.Right;
+  (Result as TLinesFigure).FLineWidth := Self.FLineWidth;
+  (Result as TLinesFigure).FLineStyle := Self.FLineStyle;
+  (Result as TLinesFigure).FLineColor := Self.FLineColor;
+end;
+
   { TFilledFigure }
 
 function TFilledFigures.Save: StrArr;
@@ -429,6 +481,16 @@ begin
   Inherited;
   FBrushStyle := TBrushStyle(GetEnumValue(TypeInfo(TBrushStyle), AParameters[4]));
   FBrushColor := StringToColor(AParameters[5]);
+end;
+
+function TFilledFigures.Copy: TFigure;
+var
+  i: integer;
+begin
+  Inherited;
+  Result := Inherited;
+  (Result as TFilledFigures).FBrushStyle := Self.FBrushStyle;
+  (Result as TFilledFigures).FBrushColor := Self.FBrushColor;
 end;
 
   { TTwoPointsFigure }
@@ -477,6 +539,12 @@ begin
   Inherited;
 end;
 
+function TTwoPointsFigure.Copy: TFigure;
+begin
+  Inherited;
+  Result := Inherited;
+end;
+
   { TRectangle }
 
 constructor TRectangle.Create(APenColor, ABrushColor: TColor; APenStyle: TFPPenStyle;
@@ -513,7 +581,7 @@ begin
   DeleteObject(Rect);
 end;
 
-function TRectangle.IsPointInside(ABounds: TDoubleRect): Boolean;
+function TRectangle.IsPointInside(ADoublePoint: TDoublePoint): Boolean;
 var
   Point: TPoint;
   Rect: HRGN;
@@ -564,7 +632,7 @@ begin
   DeleteObject(RoundRect);
 end;
 
-function TRoundRect.IsPointInside(ABounds: TDoubleRect): Boolean;
+function TRoundRect.IsPointInside(ADoublePoint: TDoublePoint): Boolean;
 var
   Point: TPoint;
   RoundRect: HRGN;
@@ -572,7 +640,7 @@ begin
   with WorldToScreen(GetBounds) do begin
     RoundRect := CreateRoundRectRgn(Left, Top, Right, Bottom, RadiusX, RadiusY);
   end;
-  Point := WorldToScreen(DoublePoint(ABounds.Left, ABounds.Top));
+  Point := WorldToScreen(ADoublePoint);
   Result := PtInRegion(RoundRect, Point.X, Point.Y);
   DeleteObject(RoundRect);
 end;
@@ -592,6 +660,14 @@ begin
   Inherited;
   RadiusX := StrToInt(AParameters[High(AParameters) - 1]);
   RadiusY := StrToInt(AParameters[High(AParameters)]);;
+end;
+
+function TRoundRect.Copy: TFigure;
+begin
+  Inherited;
+  Result := Inherited;
+  (Result as TRoundRect).RadiusX := Self.RadiusX;
+  (Result as TRoundRect).RadiusY := Self.RadiusY;
 end;
 
   { TEllipse }
@@ -630,7 +706,7 @@ begin
   DeleteObject(Rect);
 end;
 
-function TEllipse.IsPointInside(ABounds: TDoubleRect): Boolean;
+function TEllipse.IsPointInside(ADoublePoint: TDoublePoint): Boolean;
 var
   Point: TPoint;
   Ellipse: HRGN;
@@ -638,7 +714,7 @@ begin
   with WorldToScreen(GetBounds) do begin
     Ellipse := CreateEllipticRgn(Left, Top, Right, Bottom);
   end;
-  Point := WorldToScreen(DoublePoint(ABounds.Left, ABounds.Top));
+  Point := WorldToScreen(ADoublePoint);
   Result := PtInRegion(Ellipse, Point.X, Point.Y);
   DeleteObject(Ellipse);
 end;
@@ -663,17 +739,16 @@ begin
   Canvas.Line(WorldToScreen(Bounds));
 end;
 
-function TLine.IsPointInside(ABounds: TDoubleRect): Boolean;
+function TLine.IsPointInside(ADoublePoint: TDoublePoint): Boolean;
 var
-  B: TDoubleRect;
+  B: TDoublePoint;
   Delta: integer = 2;
 begin
   Result := false;
-  B.Left   := ABounds.Left - Delta;
-  B.Top    := ABounds.Top - Delta;
-  B.Right  := ABounds.Right + Delta;
-  B.Bottom := ABounds.Bottom + Delta;
- if IsRectIntersectSegment(GetBounds.TopLeft, GetBounds.BottomRight, B) then
+  B.X   := ADoublePoint.X - Delta;
+  B.Y   := ADoublePoint.Y - Delta;
+  with GetBounds, B do
+ if IsRectIntersectSegment(TopLeft, BottomRight, DoubleRect(X, Y, X, Y)) then
    Result := true;
 end;
 
@@ -753,6 +828,20 @@ begin
   FLineColor := StringToColor(AParameters[3]);
 end;
 
+function TLine.Copy: TFigure;
+var
+  i: Integer;
+begin
+  Result := TLine.Create(clBlack, psSolid, 1);
+  Result.Bounds.Top := Self.Bounds.Top;
+  Result.Bounds.Left := Self.Bounds.Left;
+  Result.Bounds.Bottom := Self.Bounds.Bottom;
+  Result.Bounds.Right := Self.Bounds.Right;
+  (Result as TLine).FLineWidth := Self.FLineWidth;
+  (Result as TLine).FLineStyle := Self.FLineStyle;
+  (Result as TLine).FLineColor := Self.FLineColor;
+end;
+
   { TFrame }
 
 procedure TFrame.Draw(Canvas: TCanvas);
@@ -815,7 +904,7 @@ begin
   DeleteObject(Polygon);
 end;
 
-function TPolygon.IsPointInside(ABounds: TDoubleRect): Boolean;
+function TPolygon.IsPointInside(ADoublePoint: TDoublePoint): Boolean;
 var
   Polygon: HRGN;
   Points: array of TPoint;
@@ -824,8 +913,8 @@ begin
   SetLength(Points, NumberOfAngles);
   Points := WorldPointsToScreen(Angles);
   Polygon := CreatePolygonRgn(Points[0], Length(Points), WINDING);
-  Point := WorldToScreen(DoublePoint(ABounds.Left, ABounds.Top));
-  Result := PtInRegion(Polygon, Point.x, Point.y);
+  Point := WorldToScreen(ADoublePoint);
+  Result := PtInRegion(Polygon, Point.X, Point.X);
   DeleteObject(Polygon);
 end;
 
@@ -841,6 +930,13 @@ procedure TPolygon.Load(AParameters: StrArr);
 begin
   Inherited;
   NumberOfAngles := StrToInt(AParameters[High(AParameters)]);
+end;
+
+function TPolygon.Copy: TFigure;
+begin
+  Inherited;
+  Result := Inherited;
+  (Result as TPolygon).NumberOfAngles := Self.NumberOfAngles;
 end;
 
 end.
