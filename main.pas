@@ -498,7 +498,7 @@ var
   f: TextFile;
   Reply, BoxStyle: Integer;
 begin
-  SaveImageDialog := TSaveDialog.Create(self);
+  SaveImageDialog := TSaveDialog.Create(Self);
   with SaveImageDialog do begin
     InitialDir := GetCurrentDir;
     Title      := 'Save image as Paint Emulator Format';

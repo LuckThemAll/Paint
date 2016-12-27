@@ -10,7 +10,6 @@ uses
 type
 
   TFigureClass = class of TFigure;
-  TCodeArray = array of Integer;
 
   { TParameters }
 
