@@ -48,7 +48,7 @@ type
     procedure DrawGridPrepareCanvas(sender: TObject; aCol, aRow: Integer;
       aState: TGridDrawState);
     procedure DrawGridVisibleClick(Sender: TObject);
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure ExitBtnClick(Sender: TObject);
     procedure AboutBtnClick(Sender: TObject);
@@ -222,22 +222,23 @@ begin
   DrawGrid.Visible := not DrawGrid.Visible;
 end;
 
-procedure TMainScreen.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure TMainScreen.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 var
   IntMessageDialog: integer;
 begin
   If MainScreen.Caption[1] = '*' then begin
-    IntMessageDialog := MessageDLG('Save the current Image?', mtConfirmation, [mbYes,mbNo],0);
+    IntMessageDialog := MessageDLG('Save the current Image?', mtConfirmation, [mbYes,mbNo, mbCancel],0);
     case IntMessageDialog of
       mrYes: begin
         SaveAsBtnClick(TObject.Create);
-        Application.Terminate;
+        CanClose := True;
       end;
-      mrNo: Application.Terminate;
+      mrNo: CanClose := True;
+      mrCancel: CanClose := False;
     end;
   end
   else
-    Application.Terminate;
+    CanClose := True;
 end;
 
 procedure TMainScreen.ExitBtnClick(Sender: TObject);
@@ -245,13 +246,14 @@ var
   IntMessageDialog: integer;
 begin
   If MainScreen.Caption[1] = '*' then begin
-    IntMessageDialog := MessageDLG('Save the current Image?', mtConfirmation, [mbYes,mbNo],0);
+    IntMessageDialog := MessageDLG('Save the current Image?', mtConfirmation, [mbYes,mbNo, mbCancel],0);
     case IntMessageDialog of
       mrYes: begin
         SaveAsBtnClick(TObject.Create);
         Application.Terminate;
       end;
       mrNo: Application.Terminate;
+      mrCancel: Exit;
     end;
   end
   else
@@ -329,6 +331,7 @@ begin
         if Figures[i].Selected then
           Figures[i].FLineColor := PenColorPanel.Color;
       History.SaveHistory;
+      FileWasChanged := True;
     end;
   end;
   if Button = mbRight then begin
@@ -339,6 +342,7 @@ begin
         if Figures[i].Selected then
           Figures[i].FBrushColor := BrushColorPanel.Color;
       History.SaveHistory;
+      FileWasChanged := True;
     end;
   end;
   Invalidate;
@@ -600,8 +604,8 @@ begin
     CloseFile(f);
     SetScreenCoords(0, 0);
     UpdateScreenCoords;
-    History.SetInitialBufer;
     History.SaveHistory;
+    History.SetInitialBufer;
     FileWasChanged := False;
     UpdateFileName;
     SetCoordsForBars(CanvasCoords, ImageCoords);

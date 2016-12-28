@@ -8,7 +8,7 @@ object MainScreen: TMainScreen
   ClientWidth = 704
   Color = clWhite
   Menu = MainMenu
-  OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnPaint = FormPaint
   LCLVersion = '1.6.0.4'
