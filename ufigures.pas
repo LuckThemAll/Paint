@@ -411,10 +411,10 @@ begin
   Result[0] := ClassName;
   Result[1] := IntToStr(Length(Result) - 1);
   with Bounds do
-  Result[2] := FloatToStr(Min(Bounds.Top, Bounds.Bottom)) + ' ' +
-               FloatToStr(Min(Bounds.Left, Bounds.Right)) + ' ' +
-               FloatToStr(Max(Bounds.Top, Bounds.Bottom)) + ' ' +
-               FloatToStr(Max(Bounds.Left, Bounds.Right));
+  Result[2] := Format('%s %s %s %s', [FloatToStr(Min(Bounds.Top, Bounds.Bottom)),
+                                      FloatToStr(Min(Bounds.Left, Bounds.Right)),
+                                      FloatToStr(Max(Bounds.Top, Bounds.Bottom)),
+                                      FloatToStr(Max(Bounds.Left, Bounds.Right))]);
   Result[3] := IntToStr(FLineWidth);
   Result[4] := GetEnumName(TypeInfo(TFPPenStyle),ord(FLineStyle));
   Result[5] := ColorToString(FLineColor);
@@ -647,7 +647,6 @@ end;
 
 function TRoundRect.Save: StrArr;
 begin
-  Inherited;
   Result := Inherited;
   SetLength(Result, Length(Result) + 2);
   Result[1] := IntToStr(Length(Result) - 2);
@@ -908,13 +907,16 @@ function TPolygon.IsPointInside(ADoublePoint: TDoublePoint): Boolean;
 var
   Polygon: HRGN;
   Points: array of TPoint;
-  Point: TPoint;
+  ABounds: TDoubleRect;
 begin
   SetLength(Points, NumberOfAngles);
   Points := WorldPointsToScreen(Angles);
+  ABounds.Top    := ADoublePoint.Y;
+  ABounds.Left   := ADoublePoint.X;
+  ABounds.Bottom := ADoublePoint.Y + 3;
+  ABounds.Right  := ADoublePoint.X + 3;
   Polygon := CreatePolygonRgn(Points[0], Length(Points), WINDING);
-  Point := WorldToScreen(ADoublePoint);
-  Result := PtInRegion(Polygon, Point.X, Point.X);
+  Result := RectInRegion(Polygon, WorldToScreen(ABounds));
   DeleteObject(Polygon);
 end;
 

@@ -55,8 +55,8 @@ procedure THistory.SetInitialBufer;
 var
   i: Integer;
 begin
-  FPointer := 1;
-  for i := 2 to BufferLength do
+  FPointer := 0;
+  for i := 1 to BufferLength do
     HistoryBuffer[i] := Nil;
   AvailableRedo := 0;
   AvailableUndo := 0;

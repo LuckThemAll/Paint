@@ -537,7 +537,6 @@ begin
         WriteToFile(SaveImageDialog.FileName);
       end
       else begin
-        SaveImageDialog.Free;
         SaveAsBtnClick(TObject.Create);
         Exit;
       end;
@@ -546,7 +545,6 @@ begin
       WriteToFile(SaveImageDialog.FileName);
     end;
   end;
-  SaveImageDialog.Free;
 end;
 
 procedure TMainScreen.SaveClick(Sender: TObject);
@@ -623,8 +621,8 @@ begin
     CloseFile(f);
     SetScreenCoords(0, 0);
     UpdateScreenCoords;
-    History.SaveHistory;
     History.SetInitialBufer;
+    History.SaveHistory;
     FileWasChanged := False;
     UpdateFileName;
     SetCoordsForBars(CanvasCoords, ImageCoords);
