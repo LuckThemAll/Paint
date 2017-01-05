@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   Menus, ComCtrls, StdCtrls, Buttons, Grids, PairSplitter, Spin, AboutForm,
-  UFigures, UTools, math, LCLType, UScale, Types, UHistory;
+  UFigures, UTools, math, LCLType, UScale, Types, UHistory, UEdit;
 
 type
 
@@ -21,6 +21,8 @@ type
     BlackSquare: TPanel;
     FullExtent: TMenuItem;
     EditMenu: TMenuItem;
+    InsertBtn: TMenuItem;
+    CopyBtn: TMenuItem;
     UndoBtn: TMenuItem;
     RedoBtn: TMenuItem;
     OpenBtn: TMenuItem;
@@ -42,6 +44,7 @@ type
     WidthChange: TTrackBar;
     SaveImageDialog: TSaveDialog;
     OpenImageDialog: TOpenDialog;
+    procedure CopyBtnClick(Sender: TObject);
     procedure DrawGridDblClick(Sender: TObject);
     procedure DrawGridMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -54,6 +57,7 @@ type
     procedure AboutBtnClick(Sender: TObject);
     procedure FormPaint(Sender: TObject);
     procedure FullExtentClick(Sender: TObject);
+    procedure InsertBtnClick(Sender: TObject);
     procedure UndoBtnClick(Sender: TObject);
     procedure RedoBtnClick(Sender: TObject);
     procedure OpenBtnClick(Sender: TObject);
@@ -356,6 +360,21 @@ begin
     PenColor := ColorDialog.Color;
   end;
 end;
+
+procedure TMainScreen.CopyBtnClick(Sender: TObject);
+begin
+  Edit.CopyFigure;
+end;
+
+procedure TMainScreen.InsertBtnClick(Sender: TObject);
+begin
+  CurrentTool.UnselectAll;
+  History.SaveHistory;
+  Edit.InsertFigures;
+  Invalidate;
+end;
+
+
 
   { PaintBox }
 

@@ -211,6 +211,16 @@ object MainScreen: TMainScreen
     end
     object EditMenu: TMenuItem
       Caption = 'Edit'
+      object CopyBtn: TMenuItem
+        Caption = 'Copy'
+        ShortCut = 16451
+        OnClick = CopyBtnClick
+      end
+      object InsertBtn: TMenuItem
+        Caption = 'Insert'
+        ShortCut = 16470
+        OnClick = InsertBtnClick
+      end
       object UndoBtn: TMenuItem
         Caption = 'Undo'
         ShortCut = 16474
