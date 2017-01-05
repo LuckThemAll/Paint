@@ -23,6 +23,8 @@ type
     EditMenu: TMenuItem;
     InsertBtn: TMenuItem;
     CopyBtn: TMenuItem;
+    CutBtn: TMenuItem;
+    DeleteBtn: TMenuItem;
     UndoBtn: TMenuItem;
     RedoBtn: TMenuItem;
     OpenBtn: TMenuItem;
@@ -45,6 +47,8 @@ type
     SaveImageDialog: TSaveDialog;
     OpenImageDialog: TOpenDialog;
     procedure CopyBtnClick(Sender: TObject);
+    procedure CutBtnClick(Sender: TObject);
+    procedure DeleteBtnClick(Sender: TObject);
     procedure DrawGridDblClick(Sender: TObject);
     procedure DrawGridMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -366,11 +370,27 @@ begin
   Edit.CopyFigure;
 end;
 
-procedure TMainScreen.InsertBtnClick(Sender: TObject);
+procedure TMainScreen.CutBtnClick(Sender: TObject);
 begin
+  Edit.Cut;
   CurrentTool.UnselectAll;
   History.SaveHistory;
+  Invalidate;
+end;
+
+procedure TMainScreen.DeleteBtnClick(Sender: TObject);
+begin
+  Edit.Delete;
+  CurrentTool.UnselectAll;
+  History.SaveHistory;
+  Invalidate;
+end;
+
+procedure TMainScreen.InsertBtnClick(Sender: TObject);
+begin
   Edit.InsertFigures;
+  CurrentTool.UnselectAll;
+  History.SaveHistory;
   Invalidate;
 end;
 

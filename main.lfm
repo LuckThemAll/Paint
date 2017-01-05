@@ -216,6 +216,17 @@ object MainScreen: TMainScreen
         ShortCut = 16451
         OnClick = CopyBtnClick
       end
+      object DeleteBtn: TMenuItem
+        Caption = 'Delete'
+        ShortCut = 46
+        ShortCutKey2 = 8
+        OnClick = DeleteBtnClick
+      end
+      object CutBtn: TMenuItem
+        Caption = 'Cut'
+        ShortCut = 16472
+        OnClick = CutBtnClick
+      end
       object InsertBtn: TMenuItem
         Caption = 'Insert'
         ShortCut = 16470
