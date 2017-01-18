@@ -13,6 +13,10 @@ type
     CopiedFigures: ArrayOfTFigure;
     procedure CopyFigure; virtual;
     procedure InsertFigures;
+    procedure UpLayer;
+    procedure DownLayer;
+    procedure MoveBack;
+    procedure MoveFront;
     procedure Cut;
     procedure Delete;
   end;
@@ -101,6 +105,70 @@ begin
     end;
   for i := 1 to Counter do
     ShiftFigures;
+end;
+
+procedure SwapFigures(n, v: integer);
+var
+  f: TFigure;
+begin
+  case v of
+  1: if not Figures[n+1].Selected then begin
+         f := Figures[n].Copy;
+         Figures[n] := Figures[n+1].Copy;
+         Figures[n+1] := f.Copy;
+       end;
+  0: if not Figures[n-1].Selected then begin
+         f := Figures[n].Copy;
+         Figures[n] := Figures[n-1].Copy;
+         Figures[n-1] := f.Copy;
+       end;
+  end;
+end;
+
+procedure TEdit.UpLayer;
+var
+  i: integer;
+begin
+  i := High(Figures)-1;
+  while i > Low(Figures)-1 do begin
+    if Figures[i].Selected then begin
+      SwapFigures(i, 1);
+      Figures[i+1].Selected := True;
+      Dec(i);
+    end;
+    Dec(i);
+  end;
+end;
+
+procedure TEdit.DownLayer;
+var
+  i: integer;
+begin
+  i := Low(Figures)+1;
+  while i < High(Figures)+1 do begin
+    if Figures[i].Selected then begin
+      SwapFigures(i, 0);
+      Figures[i-1].Selected := True;
+      Inc(i);
+    end;
+    Inc(i);
+  end;
+end;
+
+procedure TEdit.MoveBack;
+var
+  i: integer;
+begin
+  for i := 0 to High(Figures) do
+    Edit.DownLayer;
+end;
+
+procedure TEdit.MoveFront;
+var
+  i: integer;
+begin
+  for i := 0 to High(Figures) do
+    Edit.UpLayer;
 end;
 
 initialization

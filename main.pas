@@ -25,6 +25,11 @@ type
     CopyBtn: TMenuItem;
     CutBtn: TMenuItem;
     DeleteBtn: TMenuItem;
+    LayerMenu: TMenuItem;
+    UpLayersEdit: TMenuItem;
+    DownLayersEdit: TMenuItem;
+    MoveFrontEdit: TMenuItem;
+    MoveBackEdit: TMenuItem;
     UndoBtn: TMenuItem;
     RedoBtn: TMenuItem;
     OpenBtn: TMenuItem;
@@ -49,6 +54,7 @@ type
     procedure CopyBtnClick(Sender: TObject);
     procedure CutBtnClick(Sender: TObject);
     procedure DeleteBtnClick(Sender: TObject);
+    procedure DownLayersEditClick(Sender: TObject);
     procedure DrawGridDblClick(Sender: TObject);
     procedure DrawGridMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -62,6 +68,8 @@ type
     procedure FormPaint(Sender: TObject);
     procedure FullExtentClick(Sender: TObject);
     procedure InsertBtnClick(Sender: TObject);
+    procedure MoveBackEditClick(Sender: TObject);
+    procedure MoveFrontEditClick(Sender: TObject);
     procedure UndoBtnClick(Sender: TObject);
     procedure RedoBtnClick(Sender: TObject);
     procedure OpenBtnClick(Sender: TObject);
@@ -92,6 +100,7 @@ type
     procedure SetPaletteColors;
     procedure SetParametersPanel;
     procedure SetBtn;
+    procedure UpLayersEditClick(Sender: TObject);
     procedure WriteToFile(AFileName: string);
     procedure UpdateFileName;
     procedure UpdateScreenCoords;
@@ -388,13 +397,39 @@ end;
 
 procedure TMainScreen.InsertBtnClick(Sender: TObject);
 begin
-  Edit.InsertFigures;
   CurrentTool.UnselectAll;
+  Edit.InsertFigures;
   History.SaveHistory;
   Invalidate;
 end;
 
+procedure TMainScreen.MoveBackEditClick(Sender: TObject);
+begin
+  Edit.MoveBack;
+  History.SaveHistory;
+  Invalidate;
+end;
 
+procedure TMainScreen.MoveFrontEditClick(Sender: TObject);
+begin
+  Edit.MoveFront;
+  History.SaveHistory;
+  Invalidate;
+end;
+
+procedure TMainScreen.UpLayersEditClick(Sender: TObject);
+begin
+  Edit.UpLayer;
+  History.SaveHistory;
+  Invalidate;
+end;
+
+procedure TMainScreen.DownLayersEditClick(Sender: TObject);
+begin
+  Edit.DownLayer;
+  History.SaveHistory;
+  Invalidate;
+end;
 
   { PaintBox }
 

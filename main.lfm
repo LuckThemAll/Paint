@@ -243,6 +243,29 @@ object MainScreen: TMainScreen
         OnClick = RedoBtnClick
       end
     end
+    object LayerMenu: TMenuItem
+      Caption = 'Layer Edit'
+      object UpLayersEdit: TMenuItem
+        Caption = 'Up Layers'
+        ShortCut = 16465
+        OnClick = UpLayersEditClick
+      end
+      object DownLayersEdit: TMenuItem
+        Caption = 'Down Layers'
+        ShortCut = 16471
+        OnClick = DownLayersEditClick
+      end
+      object MoveFrontEdit: TMenuItem
+        Caption = 'Move Front'
+        ShortCut = 24657
+        OnClick = MoveFrontEditClick
+      end
+      object MoveBackEdit: TMenuItem
+        Caption = 'Move Back'
+        ShortCut = 24663
+        OnClick = MoveBackEditClick
+      end
+    end
   end
   object ColorDialog: TColorDialog
     Color = clBlack
