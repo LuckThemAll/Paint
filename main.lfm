@@ -1,7 +1,7 @@
 object MainScreen: TMainScreen
-  Left = 718
+  Left = 988
   Height = 649
-  Top = 34
+  Top = 315
   Width = 704
   Caption = 'MainScreen'
   ClientHeight = 629
@@ -219,7 +219,6 @@ object MainScreen: TMainScreen
       object DeleteBtn: TMenuItem
         Caption = 'Delete'
         ShortCut = 46
-        ShortCutKey2 = 8
         OnClick = DeleteBtnClick
       end
       object CutBtn: TMenuItem
@@ -244,7 +243,7 @@ object MainScreen: TMainScreen
       end
     end
     object LayerMenu: TMenuItem
-      Caption = 'Layer Edit'
+      Caption = 'Layers'
       object UpLayersEdit: TMenuItem
         Caption = 'Up Layers'
         ShortCut = 16465

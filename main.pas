@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  Menus, ComCtrls, StdCtrls, Buttons, Grids, PairSplitter, Spin, AboutForm,
+  Menus, ComCtrls, StdCtrls, Buttons, Grids, Spin, AboutForm,
   UFigures, UTools, math, LCLType, UScale, Types, UHistory, UEdit;
 
 type
@@ -220,8 +220,6 @@ end;
   { Btn }
 
 procedure TMainScreen.ToolClick(Sender: TObject);
-var
-  b: TPanel;
 begin
     CurrentTool := ToolRegistry[(Sender as TBitBtn).Tag];
     PaintBox.Cursor := crArrow;
@@ -452,9 +450,6 @@ end;
 
 procedure TMainScreen.PaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-var
-  i: integer;
-  b: TDoubleRect;
 begin
   WasMouseDown := false;
   CurrentTool.MouseUp(X, Y, PaintBox.Width, PaintBox.Height, Shift);
@@ -573,7 +568,6 @@ end;
 
 procedure TMainScreen.SaveAsBtnClick(Sender: TObject);
 var
-  f: TextFile;
   Reply, BoxStyle: Integer;
 begin
   SaveImageDialog := TSaveDialog.Create(Self);
@@ -614,7 +608,7 @@ end;
 procedure TMainScreen.WriteToFile(AFileName: string);
 var
   f: TextFile;
-  i,j: integer;
+  i: integer;
 begin
   AssignFile(f,AFileName);
   DeleteFile(AFileName);
@@ -635,7 +629,6 @@ var
  i, j, CountOfFigures, CountOfParameters: Integer;
  FileSignature, FigureName: String;
  AParameters: StrArr;
- b: TDoubleRect;
 begin
   OpenImageDialog := TOpenDialog.Create(Self);
   with OpenImageDialog do begin

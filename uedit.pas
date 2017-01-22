@@ -27,15 +27,17 @@ type
 
 implementation
 
-procedure ShiftFigures;
+procedure CompactFigures;
 var
   i, j: integer;
 begin
   for i := Low(Figures) to High(Figures) do
     if Figures[i] = nil then
       for j := i to High(Figures) - 1 do begin
-        if Figures[j+1] = Nil then
-          Figures[j] := Nil
+        if Figures[j+1] = Nil then begin
+          Figures[j] := Nil;
+          Figures[j].Free;
+        end
         else
           Figures[j] := Figures[j+1].Copy;
       end;
@@ -45,7 +47,7 @@ end;
 procedure TEdit.CopyFigure;
 var
   i: Integer;
-  Counter: Integer;
+  Counter: Integer = 0;
 begin
   for i := Low(Figures) to High(Figures) do
     if Figures[i].Selected then begin
@@ -57,15 +59,12 @@ end;
 
 procedure TEdit.InsertFigures;
 var
-  i, j, k, HighFigures: integer;
+  i, HighFigures: integer;
   Counter: Integer = 0;
 begin
   if CopiedFigures <> Nil then begin
     HighFigures := High(Figures);
     SetLength(Figures, Length(Figures) + Length(CopiedFigures));
-    j := High(Figures);
-    k := Length(Figures);
-    j := (HighFigures + Length(CopiedFigures));
     for i := (HighFigures + 1) to (HighFigures + Length(CopiedFigures)) do begin
       Figures[i] := CopiedFigures[Counter].Copy;
       Figures[i].Selected := True;
@@ -86,9 +85,10 @@ begin
       SetLength(CopiedFigures, Counter);
       CopiedFigures[High(CopiedFigures)] := Figures[i].Copy;
       Figures[i] := Nil;
+      Figures[i].Free;
     end;
   for i := 1 to Length(CopiedFigures) do
-    ShiftFigures;
+    CompactFigures;
 end;
 
 procedure TEdit.Delete;
@@ -100,11 +100,11 @@ begin
   for i := Low(Figures) to High(Figures) do
     if Figures[i].Selected then begin
       Inc(Counter);
-      Figures[i].Selected := False;
       Figures[i] := Nil;
+      Figures[i].Free;
     end;
   for i := 1 to Counter do
-    ShiftFigures;
+    CompactFigures;
 end;
 
 procedure SwapFigures(n, v: integer);
@@ -114,13 +114,19 @@ begin
   case v of
   1: if not Figures[n+1].Selected then begin
          f := Figures[n].Copy;
+         Figures[n].Free;
          Figures[n] := Figures[n+1].Copy;
+         Figures[n+1].Free;
          Figures[n+1] := f.Copy;
+         f.Free;
        end;
   0: if not Figures[n-1].Selected then begin
          f := Figures[n].Copy;
+         Figures[n].Free;
          Figures[n] := Figures[n-1].Copy;
+         Figures[n-1].Free;
          Figures[n-1] := f.Copy;
+         f.Free;
        end;
   end;
 end;

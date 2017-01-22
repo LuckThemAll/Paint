@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, UFigures, Graphics, UScale, math, ExtCtrls, Spin, StdCtrls,
-   FPCanvas, Controls, UHistory;
+   FPCanvas, Controls, UHistory, Buttons;
 type
 
   TFigureClass = class of TFigure;
